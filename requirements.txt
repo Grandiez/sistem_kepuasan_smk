@@ -5,5 +5,6 @@ plotly
 matplotlib
 openpyxl
 fpdf2
-kaleido==0.1.0.post1
+kaleido
+
 
