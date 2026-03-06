@@ -1,15 +1,17 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import os
+from fpdf import FPDF
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide")
+st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide", initial_sidebar_state="expanded")
 
 st.title("📊 Analisis Kepuasan Siswa - SMK N 1 Dawuan")
-st.markdown("Sistem analisis kepuasan siswa menggunakan metode **PCA & K-Means Clustering**.")
+st.markdown("Sistem Analisis Kepuasan Siswa Berbasis **Machine Learning (PCA & K-Means Clustering)**.")
 
 # --- SIDEBAR: UPLOAD ---
 st.sidebar.header("1. Input Data")
@@ -23,7 +25,6 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(uploaded_file)
             
-        # STEP KRUSIAL: RENAMING KOLOM
         nama_kolom_baru = ['Timestamp', 'Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin'] + [f'P{i}' for i in range(1, 21)]
         
         if len(df.columns) >= 25: 
@@ -40,24 +41,20 @@ if uploaded_file is not None:
     # --- PROSES 2: PCA & K-MEANS ---
     kolom_nilai = [f'P{i}' for i in range(1, 21)]
     
-    # Pembersih Data Kosong Otomatis
     jml_awal = len(df)
     df = df.dropna(subset=kolom_nilai).reset_index(drop=True)
     jml_akhir = len(df)
     
     if jml_awal != jml_akhir:
-        st.warning(f"⚠️ Ditemukan {jml_awal - jml_akhir} data kuesioner yang tidak lengkap (ada sel kosong). Data otomatis diabaikan agar sistem tidak error.")
+        st.sidebar.warning(f"⚠️ Ditemukan {jml_awal - jml_akhir} data kuesioner tidak lengkap. Otomatis diabaikan.")
 
     data_numeric = df[kolom_nilai]
-    
-    # Scaling & PCA
     scaler = StandardScaler()
     scaled_data = scaler.fit_transform(data_numeric)
 
     pca = PCA(n_components=3)
     pca_data = pca.fit_transform(scaled_data)
     
-    # Koordinat X, Y, Z untuk grafik 3D
     df['PC1'] = pca_data[:, 0]
     df['PC2'] = pca_data[:, 1]
     df['PC3'] = pca_data[:, 2]
@@ -65,15 +62,8 @@ if uploaded_file is not None:
     # --- KONFIGURASI ALGORITMA ---
     st.sidebar.header("2. Konfigurasi Algoritma")
     gunakan_pca = st.sidebar.toggle("🟢 Aktifkan Reduksi PCA", value=True)
-    
-    if gunakan_pca:
-        st.sidebar.success("PCA Aktif: 20 pertanyaan diperas jadi 3 Komponen (Sumbu X, Y, Z) untuk K-Means.")
-        data_untuk_kmeans = pca_data 
-    else:
-        st.sidebar.error("PCA Mati: K-Means memproses 20 Dimensi Mentah!")
-        data_untuk_kmeans = scaled_data 
+    data_untuk_kmeans = pca_data if gunakan_pca else scaled_data 
 
-    # Clustering K-Means
     n_clusters = st.sidebar.slider("Jumlah Klaster (K)", 2, 5, 3)
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
@@ -94,187 +84,371 @@ if uploaded_file is not None:
         df['Jurusan'].isin(pilih_jurusan) & 
         df['Kelas'].isin(pilih_kelas) &
         df['Jenis_Kelamin'].isin(pilih_jk)
-    ]
+    ].copy()
 
     if df_filtered.empty:
         st.warning("⚠️ Data tidak ditemukan dengan kombinasi filter tersebut.")
     else:
-        # --- DASHBOARD UTAMA ---
-        st.subheader("👥 Statistik Responden")
-        cols = st.columns(len(df_filtered['Cluster'].unique()))
-        counts = df_filtered['Cluster'].value_counts().sort_index()
-        for i, (cls, count) in enumerate(counts.items()):
-            cols[i].metric(f"Klaster {cls}", f"{count} Siswa")
-
-        # Visualisasi 3D
-        st.subheader("🌐 Peta Sebaran Siswa")
-        fig = px.scatter_3d(
-            df_filtered, x='PC1', y='PC2', z='PC3',
-            color=df_filtered['Cluster'].astype(str),
-            hover_data=['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin'],
-            title=f"Visualisasi 3D (Total: {len(df_filtered)} Siswa)",
-            labels={'color': 'Klaster'}
-        )
-        fig.update_layout(height=700)
-        st.plotly_chart(fig, use_container_width=True)
-
-        # Profiling Dimensi
+        # --- PERSIAPAN DATA DIMENSI & KAMUS ---
         df_filtered['Fasilitas'] = df_filtered[[f'P{i}' for i in range(1, 6)]].mean(axis=1)
         df_filtered['Kurikulum'] = df_filtered[[f'P{i}' for i in range(6, 11)]].mean(axis=1)
         df_filtered['Guru'] = df_filtered[[f'P{i}' for i in range(11, 16)]].mean(axis=1)
         df_filtered['Lingkungan'] = df_filtered[[f'P{i}' for i in range(16, 21)]].mean(axis=1)
 
         profile = df_filtered.groupby('Cluster')[['Fasilitas', 'Kurikulum', 'Guru', 'Lingkungan']].mean()
-        
-        # Bar Chart Grouped
-        st.subheader("📈 Perbandingan Skor Rata-rata")
-        profile_reset = profile.reset_index()
-        profile_reset['Label_Klaster'] = profile_reset['Cluster'].apply(lambda x: f"Klaster {x}<br>({counts[x]} Siswa)")
-        
-        fig_bar = px.bar(
-            profile_reset, x='Label_Klaster', 
-            y=['Fasilitas', 'Kurikulum', 'Guru', 'Lingkungan'],
-            barmode='group',
-            labels={'value': 'Skor (1-5)', 'variable': 'Aspek', 'Label_Klaster': 'Kelompok (Klaster)'}
-        )
-        fig_bar.update_layout(legend_title_text='Dimensi Layanan', xaxis_title="Kelompok (Klaster) & Jumlah Siswa")
-        st.plotly_chart(fig_bar, use_container_width=True)
+        counts = df_filtered['Cluster'].value_counts().sort_index()
 
-        # --- KAMUS MASALAH ---
         kamus_masalah = {
-            'P1': 'Fasilitas pendukung (lab, perpus, alat praktik) dirasa kurang lengkap saat dibutuhkan',
-            'P2': 'Kondisi peralatan dan sarana belajar banyak yang rusak atau tertinggal (kurang modern)',
-            'P3': 'Area sekolah dirasa kurang memberikan rasa aman dan nyaman',
-            'P4': 'Lokasi fasilitas (kantin, toilet) kurang memadai atau sulit dijangkau',
-            'P5': 'Fasilitas yang ada belum maksimal membantu efektivitas belajar siswa',
-            'P6': 'Materi yang diajarkan dirasa kurang relevan dengan kebutuhan industri saat ini',
-            'P7': 'Siswa kesulitan memahami materi pelajaran yang disampaikan',
-            'P8': 'Kurikulum dirasa belum sesuai dengan minat dan bakat mayoritas siswa',
-            'P9': 'Metode pembelajaran terasa membosankan dan kurang bervariasi',
-            'P10': 'Siswa merasa materi yang dipelajari kurang memberikan manfaat bagi masa depannya',
-            'P11': 'Guru dirasa kurang menguasai materi secara mendalam di bidangnya',
-            'P12': 'Penjelasan guru sering berbelit-belit dan sulit dimengerti',
-            'P13': 'Guru dirasa kurang memberikan teladan yang baik (sikap, disiplin, etika)',
-            'P14': 'Guru kurang terbuka atau sulit dihubungi saat siswa mengalami kesulitan',
-            'P15': 'Guru sering terlambat, jam kosong, atau kurang profesional dalam mengajar',
-            'P16': 'Kebersihan dan kerapian lingkungan sekolah kurang terjaga dengan baik',
-            'P17': 'Lingkungan sekolah dirasa kurang aman dan sering ada gangguan',
-            'P18': 'Suasana kelas kurang kondusif sehingga mengganggu konsentrasi belajar',
-            'P19': 'Hubungan sosial antar warga sekolah (guru, siswa, staf) kurang harmonis',
-            'P20': 'Budaya sopan santun belum diterapkan secara nyata dalam keseharian'
+            'P1': 'Fasilitas pendukung dirasa kurang lengkap', 'P2': 'Peralatan belajar banyak rusak/kuno',
+            'P3': 'Area sekolah dirasa kurang aman/nyaman', 'P4': 'Lokasi fasilitas (kantin/toilet) sulit dijangkau',
+            'P5': 'Fasilitas belum maksimal membantu belajar', 'P6': 'Materi kurang relevan dengan industri',
+            'P7': 'Siswa kesulitan memahami materi', 'P8': 'Kurikulum belum sesuai minat dan bakat',
+            'P9': 'Metode pembelajaran membosankan', 'P10': 'Materi dirasa kurang bermanfaat bagi masa depan',
+            'P11': 'Guru kurang menguasai materi mendalam', 'P12': 'Penjelasan guru berbelit-belit',
+            'P13': 'Guru kurang memberi teladan etika/disiplin', 'P14': 'Guru sulit dihubungi saat siswa kesulitan',
+            'P15': 'Guru sering terlambat/jam kosong', 'P16': 'Kebersihan lingkungan sekolah kurang terjaga',
+            'P17': 'Lingkungan sekolah rawan gangguan', 'P18': 'Suasana kelas kurang kondusif',
+            'P19': 'Hubungan sosial warga sekolah kurang harmonis', 'P20': 'Budaya sopan santun belum maksimal'
         }
 
-        # --- KAMUS SOLUSI ---
         kamus_solusi = {
-            'P1': 'Lakukan inventarisasi lab/bengkel. Ajukan pengadaan alat praktik yang kurang ke yayasan/Dinas, atau buat jadwal penggunaan silang antar kelas.',
-            'P2': 'Jadwalkan maintenance rutin untuk PC lab atau mesin bengkel. Perbaiki segera alat yang rusak dan sisihkan anggaran untuk pembaruan teknologi.',
-            'P3': 'Tingkatkan patroli keamanan sekolah, pasang CCTV di titik rawan, dan pastikan pencahayaan serta sirkulasi udara di area sekolah memadai.',
-            'P4': 'Buat penunjuk arah yang jelas, tambah jumlah toilet jika rasio siswa tidak seimbang, dan atur ulang layout kantin agar tidak berdesakan.',
-            'P5': 'Evaluasi kembali kesesuaian modul ajar dengan alat yang ada. Berikan pelatihan/orientasi penggunaan alat praktik baru kepada siswa.',
-            'P6': 'Undang praktisi industri (guru tamu) secara rutin dan sinkronisasi silabus dengan mitra Dudika (Dunia Usaha Dunia Industri).',
-            'P7': 'Adakan program remedial atau tutor sebaya. Dorong guru untuk menyederhanakan modul ajar menjadi lebih visual dan lebih banyak praktik.',
-            'P8': 'Sediakan layanan konseling karir dari guru BK yang lebih intensif, dan perbanyak pilihan ekstrakurikuler peminatan keahlian.',
-            'P9': 'Adakan in-house training pedagogik bagi guru untuk menggunakan metode interaktif (kuis digital, project-based learning, simulasi).',
-            'P10': 'Sering adakan seminar karir atau kunjungan industri (industrial visit) agar siswa melihat langsung prospek kerja dari jurusan mereka.',
-            'P11': 'Fasilitasi guru produktif untuk mengikuti diklat, sertifikasi profesi, atau program magang industri agar ilmunya terus up-to-date.',
-            'P12': 'Lakukan evaluasi peer-teaching antar guru dan kumpulkan feedback anonim dari siswa tiap pertengahan semester terkait cara mengajar.',
-            'P13': 'Tegakkan kode etik guru dengan tegas oleh Kepala Sekolah/Yayasan, dan berikan penghargaan bagi guru teladan sebagai motivasi.',
-            'P14': 'Wajibkan guru menyisihkan waktu untuk jam konsultasi di luar jam pelajaran, dan latih guru memiliki pendekatan empati kepada siswa.',
-            'P15': 'Terapkan sistem presensi digital terintegrasi untuk guru dan berikan teguran tertulis bagi guru yang sering terlambat/jam kosong.',
-            'P16': 'Galakkan kembali program Jumat Bersih, perbanyak tempat sampah terpilah, dan evaluasi kinerja petugas kebersihan (OB) sekolah.',
-            'P17': 'Tindak tegas secara kedisiplinan (SP) terhadap kasus perundungan (bullying) antar siswa, dan perketat akses masuk gerbang sekolah.',
-            'P18': 'Perbaiki fasilitas kelas yang rusak (kipas/AC mati, lampu redup) dan wajibkan wali kelas membuat kesepakatan tata tertib kelas yang tegas.',
-            'P19': 'Adakan acara kebersamaan lintas kelas/jurusan (class meeting) dan mediasi segera jika ada indikasi kubu-kubuan antar siswa.',
-            'P20': 'Kampanyekan kembali budaya 5S (Senyum, Salam, Sapa, Sopan, Santun) secara masif, dan jadikan guru serta staf sebagai role model utama.'
+            'P1': 'Inventarisasi lab dan ajukan pengadaan alat.', 'P2': 'Maintenance rutin dan perbarui teknologi.',
+            'P3': 'Tingkatkan keamanan dan patroli sekolah.', 'P4': 'Perbaiki layout dan tambah fasilitas toilet/kantin.',
+            'P5': 'Evaluasi penggunaan lab agar efektif.', 'P6': 'Undang praktisi industri dan sinkronisasi kurikulum.',
+            'P7': 'Adakan tutor sebaya dan sederhanakan modul.', 'P8': 'Perkuat program konseling karir dari guru BK.',
+            'P9': 'Training guru untuk metode belajar interaktif.', 'P10': 'Adakan seminar prospek karir/kunjungan industri.',
+            'P11': 'Ikutkan guru dalam diklat/magang industri.', 'P12': 'Evaluasi cara mengajar dan kumpulkan feedback.',
+            'P13': 'Tegakkan kode etik dan beri penghargaan guru teladan.', 'P14': 'Wajibkan jam konsultasi siswa di luar kelas.',
+            'P15': 'Terapkan presensi ketat dan sanksi keterlambatan.', 'P16': 'Galakkan program kebersihan dan evaluasi OB.',
+            'P17': 'Tindak tegas pelanggaran/bullying.', 'P18': 'Perbaiki fasilitas kelas & tegakkan tatib.',
+            'P19': 'Adakan kegiatan kebersamaan lintas kelas.', 'P20': 'Kampanyekan budaya 5S secara masif.'
         }
 
         dimensi_map = {
-            'Fasilitas': [f'P{i}' for i in range(1, 6)],
-            'Kurikulum': [f'P{i}' for i in range(6, 11)],
-            'Guru': [f'P{i}' for i in range(11, 16)],
-            'Lingkungan': [f'P{i}' for i in range(16, 21)]
+            'Fasilitas': [f'P{i}' for i in range(1, 6)], 'Kurikulum': [f'P{i}' for i in range(6, 11)],
+            'Guru': [f'P{i}' for i in range(11, 16)], 'Lingkungan': [f'P{i}' for i in range(16, 21)]
         }
 
-# --- REKOMENDASI MANAJERIAL & PROFILING KELAS/JURUSAN ---
-        st.subheader("💡 Rekomendasi & Target Investigasi")
+        # Demografi Responden (Untuk Laporan PDF)
+        jml_pria = len(df_filtered[df_filtered['Jenis_Kelamin'].str.contains('Pria|Laki', case=False, na=False)])
+        jml_wanita = len(df_filtered) - jml_pria
         
-        for cluster in profile.index:
-            dimensi_terendah = profile.loc[cluster].idxmin()
-            skor_dimensi = profile.loc[cluster].min()
-            
-            cols_dimensi = dimensi_map[dimensi_terendah]
-            df_cluster = df_filtered[df_filtered['Cluster'] == cluster]
-            
-            rata_item = df_cluster[cols_dimensi].mean()
-            item_code = rata_item.idxmin()
-            skor_item = rata_item.min()
-            
-            isi_masalah = kamus_masalah[item_code] 
-            solusi_masalah = kamus_solusi[item_code] 
+        tab1, tab2 = st.tabs(["📊 Dashboard Analisis", "📑 Laporan Eksekutif"])
 
-            kelas_terbanyak = int(df_cluster['Kelas'].mode()[0])
-            jml_kelas = len(df_cluster[df_cluster['Kelas'] == kelas_terbanyak])
-            jurusan_terbanyak = df_cluster['Jurusan'].mode()[0]
-            jml_jurusan = len(df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak])
+        # ==========================================
+        # TAB 1: DASHBOARD ANALISIS 
+        # ==========================================
+        with tab1:
+            st.subheader("👥 Statistik Responden")
+            cols = st.columns(len(df_filtered['Cluster'].unique()))
+            for i, (cls, count) in enumerate(counts.items()):
+                cols[i].metric(f"Klaster {cls}", f"{count} Siswa")
 
-            # --- LOGIKA RENTANG SKALA LIKERT BARU ---
-            if skor_item >= 4.0:
-                status = "Sangat Memuaskan 🌟"
-                warna_alert = st.success
-            elif skor_item >= 3.0:
-                status = "Cukup Memuaskan (Perlu Peningkatan) 🔵"
-                warna_alert = st.info
-            elif skor_item >= 2.0:
-                status = "Kurang Memuaskan (Perlu Perbaikan) 🟠"
-                warna_alert = st.warning
-            else:
-                status = "Sangat Kurang / Kritis (Perbaikan Segera!) 🔴"
-                warna_alert = st.error
+            fig_3d = px.scatter_3d(
+                df_filtered, x='PC1', y='PC2', z='PC3', color=df_filtered['Cluster'].astype(str),
+                hover_data=['Nama', 'Kelas', 'Jurusan'], title=f"Visualisasi 3D ({len(df_filtered)} Siswa)",
+                labels={'color': 'Klaster'}
+            )
+            fig_3d.update_layout(height=600)
+            st.plotly_chart(fig_3d, use_container_width=True)
 
-            # --- TAMPILAN BERDASARKAN STATUS KEPARAHAN ---
-            if skor_item >= 4.0:
-                # JIKA SUDAH PUAS (Gak perlu dicari tersangkanya)
-                pesan = (
-                    f"**Klaster {cluster} (Status: {status})**\n\n"
-                    f"✨ **Kondisi Aman:** Secara umum siswa di klaster ini sudah **SANGAT PUAS**. Aspek terendah ada pada dimensi **{dimensi_terendah}** (potensi: *{isi_masalah}*), namun skornya masih sangat aman di angka **{skor_item:.2f}/5.00**.\n\n"
-                    f"📈 **Saran:** Pertahankan kinerja saat ini. Sebagai tindakan preventif: {solusi_masalah}"
-                )
-                warna_alert(pesan)
+            st.subheader("📈 Perbandingan Skor Rata-rata per Klaster")
+            profile_reset = profile.reset_index()
+            profile_reset['Label_Klaster'] = profile_reset['Cluster'].apply(lambda x: f"Klaster {x}<br>({counts[x]} Siswa)")
+            
+            # Warnanya dipaksa pakai warna cerah anti-bug PDF
+            fig_bar = px.bar(
+                profile_reset, x='Label_Klaster', y=['Fasilitas', 'Kurikulum', 'Guru', 'Lingkungan'],
+                barmode='group', labels={'value': 'Skor (1-5)', 'variable': 'Dimensi', 'Label_Klaster': 'Kelompok'},
+                color_discrete_sequence=['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+            st.subheader("🔍 Bedah Investigasi per Klaster")
+            for cluster in profile.index:
+                dimensi_terendah = profile.loc[cluster].idxmin()
+                skor_dimensi = profile.loc[cluster].min()
                 
-                # Menu lipat khusus yang sudah puas
-                with st.expander(f"📋 Klik untuk melihat Daftar Mayoritas Siswa di Klaster {cluster} (Tidak Butuh Investigasi)"):
-                    st.write("Karena klaster ini bersatus 'Sangat Memuaskan', Anda tidak perlu melakukan investigasi mendalam.")
-            
-            else:
-                # JIKA ADA MASALAH (Skor di bawah 4.0)
-                pesan = (
-                    f"**Klaster {cluster} (Status: {status} - Prioritas Perbaikan: {dimensi_terendah})**\n\n"
-                    f"👉 **Akar Masalah:** *{isi_masalah}* (Skor Kepuasan: **{skor_item:.2f}/5.00**).\n\n"
-                    f"🛠️ **Rekomendasi Solusi:** {solusi_masalah}\n\n"
-                    f"🎯 **Target Investigasi:** Mayoritas keluhan berasal dari **Kelas {kelas_terbanyak}** ({jml_kelas} siswa) dan **Jurusan {jurusan_terbanyak}** ({jml_jurusan} siswa).\n"
-                )
-                warna_alert(pesan)
+                cols_dimensi = dimensi_map[dimensi_terendah]
+                df_cluster = df_filtered[df_filtered['Cluster'] == cluster]
                 
-                # Menu lipat target investigasi (tetap sama)
-                with st.expander(f"📋 Klik untuk melihat Daftar Nama Target Investigasi (Klaster {cluster})"):
-                    df_kelas = df_cluster[df_cluster['Kelas'] == kelas_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
-                    df_kelas.index = df_kelas.index + 1 
-                    
-                    st.markdown(f"**🎯 1. Daftar {jml_kelas} Siswa dari Kelas {kelas_terbanyak}:**")
-                    st.dataframe(df_kelas, use_container_width=True)
-                    
-                    st.markdown("---") 
-                    
-                    df_jurusan = df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
-                    df_jurusan.index = df_jurusan.index + 1 
-                    
-                    st.markdown(f"**🎯 2. Daftar {jml_jurusan} Siswa dari Jurusan {jurusan_terbanyak}:**")
-                    st.dataframe(df_jurusan, use_container_width=True)
+                rata_item = df_cluster[cols_dimensi].mean()
+                item_code = rata_item.idxmin()
+                skor_item = rata_item.min()
+                
+                isi_masalah = kamus_masalah[item_code] 
+                solusi_masalah = kamus_solusi[item_code] 
 
-        # Download Button
-        st.markdown("---")
-        csv = df_filtered.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Laporan Excel", csv, "Laporan_Analisis_SMK.csv", "text/csv")
+                kelas_terbanyak = int(df_cluster['Kelas'].mode()[0])
+                jml_kelas = len(df_cluster[df_cluster['Kelas'] == kelas_terbanyak])
+                jurusan_terbanyak = df_cluster['Jurusan'].mode()[0]
+                jml_jurusan = len(df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak])
+
+                if skor_item >= 4.0:
+                    status, warna_alert = "Sangat Memuaskan 🌟", st.success
+                elif skor_item >= 3.0:
+                    status, warna_alert = "Cukup Memuaskan 🔵", st.info
+                elif skor_item >= 2.0:
+                    status, warna_alert = "Perlu Perbaikan 🟠", st.warning
+                else:
+                    status, warna_alert = "Kritis (Perbaikan Segera!) 🔴", st.error
+
+                if skor_item >= 4.0:
+                    pesan = f"**Klaster {cluster} (Status: {status})**\n\n✨ **Kondisi Aman:** Secara umum siswa di klaster ini sudah PUAS. Aspek terendah ada pada dimensi **{dimensi_terendah}** namun skornya masih sangat aman di angka **{skor_item:.2f}/5.00**.\n\n📈 **Saran:** Pertahankan kinerja. Preventif: {solusi_masalah}"
+                    warna_alert(pesan)
+                    
+                    with st.expander(f"📋 Lihat Daftar Mayoritas Siswa (Klaster {cluster})"):
+                        st.write("Siswa di klaster ini tidak memerlukan investigasi mendalam.")
+                else:
+                    pesan = f"**Klaster {cluster} (Status: {status} - Prioritas: {dimensi_terendah})**\n\n👉 **Akar Masalah:** *{isi_masalah}* (Skor: **{skor_item:.2f}/5.00**).\n\n🛠️ **Rekomendasi Solusi:** {solusi_masalah}\n\n🎯 **Target Investigasi:** Fokus pada **Kelas {kelas_terbanyak}** ({jml_kelas} anak) dan **Jurusan {jurusan_terbanyak}** ({jml_jurusan} anak)."
+                    warna_alert(pesan)
+                    
+                    # FITUR KEMBALI: 2 Tabel Target Investigasi (Kelas & Jurusan)
+                    with st.expander(f"📋 Klik untuk Daftar Nama Target Investigasi (Klaster {cluster})"):
+                        df_kelas = df_cluster[df_cluster['Kelas'] == kelas_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
+                        df_kelas.index += 1 
+                        st.markdown(f"**🎯 1. Target Kelas {kelas_terbanyak}:**")
+                        st.dataframe(df_kelas, use_container_width=True)
+                        
+                        st.markdown("---")
+                        
+                        df_jurusan = df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
+                        df_jurusan.index += 1 
+                        st.markdown(f"**🎯 2. Target Jurusan {jurusan_terbanyak}:**")
+                        st.dataframe(df_jurusan, use_container_width=True)
+
+            # --- PDF TAB 1 (DASHBOARD) ---
+            st.markdown("---")
+            st.subheader("📥 Cetak Laporan Operasional (PDF)")
+            def buat_pdf_dashboard():
+                # Paksa tema putih biar grafik di PDF gak jadi hitam legam
+                fig_bar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white")
+                fig_bar.write_image("temp_bar.png", engine="kaleido", width=1000, height=450)
+                
+                pdf = FPDF()
+                pdf.add_page()
+                
+                # Header Keren
+                pdf.set_font("Arial", 'B', 16)
+                pdf.cell(0, 8, txt="LAPORAN OPERASIONAL KLASTER SISWA", ln=True, align='C')
+                pdf.set_font("Arial", '', 11)
+                pdf.cell(0, 6, txt=f"SMK N 1 DAWUAN | Dicetak melalui Sistem Analisis Kepuasan", ln=True, align='C')
+                pdf.line(10, 25, 200, 25) # Garis pembatas
+                pdf.ln(10)
+                
+                # Demografi Singkat
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, txt="1. Demografi Responden:", ln=True)
+                pdf.set_font("Arial", '', 11)
+                pdf.cell(0, 6, txt=f"- Total Siswa Dianalisis: {len(df_filtered)} Siswa", ln=True)
+                pdf.cell(0, 6, txt=f"- Jenis Kelamin: Laki-laki ({jml_pria}), Perempuan ({jml_wanita})", ln=True)
+                pdf.cell(0, 6, txt=f"- Jumlah Klaster Terbentuk: {n_clusters} Kelompok", ln=True)
+                pdf.ln(5)
+
+                # Gambar Grafik Batang
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, txt="2. Grafik Perbandingan Antar Klaster:", ln=True)
+                pdf.image("temp_bar.png", x=10, w=190)
+                pdf.ln(2)
+                
+                # Detail Klaster (Berwarna)
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 10, txt="3. Rincian Temuan & Prioritas Perbaikan:", ln=True)
+                
+                for cluster in profile.index:
+                    dim_terendah = profile.loc[cluster].idxmin()
+                    skor_terendah = profile.loc[cluster].min()
+                    jml_siswa = len(df_filtered[df_filtered['Cluster'] == cluster])
+                    
+                    if skor_terendah >= 4.0:
+                        status_teks, r, g, b = "Sangat Memuaskan (Aman)", 0, 150, 0 # Hijau
+                    elif skor_terendah >= 3.0:
+                        status_teks, r, g, b = "Cukup (Perlu Peningkatan)", 0, 0, 200 # Biru
+                    elif skor_terendah >= 2.0:
+                        status_teks, r, g, b = "Kurang (Perlu Perbaikan)", 200, 100, 0 # Orange
+                    else:
+                        status_teks, r, g, b = "Kritis (Perbaikan Segera!)", 220, 0, 0 # Merah
+
+                    pdf.set_font("Arial", 'B', 11)
+                    pdf.set_text_color(0, 0, 0)
+                    pdf.cell(25, 8, txt=f"> Klaster {cluster}: ", ln=False)
+                    pdf.set_text_color(r, g, b) # Kasih warna ke status
+                    pdf.cell(0, 8, txt=status_teks, ln=True)
+                    
+                    pdf.set_text_color(0, 0, 0) # Balikin ke hitam
+                    pdf.set_font("Arial", '', 10)
+                    pdf.cell(0, 6, txt=f"   - Jumlah Siswa: {jml_siswa} Orang", ln=True)
+                    pdf.cell(0, 6, txt=f"   - Prioritas Utama: Dimensi {dim_terendah} (Skor: {skor_terendah:.2f}/5.00)", ln=True)
+                    pdf.ln(2)
+
+                pdf.output("temp_dashboard.pdf")
+                with open("temp_dashboard.pdf", "rb") as f:
+                    pdf_bytes_dash = f.read()
+                    
+                for file in ["temp_bar.png", "temp_dashboard.pdf"]:
+                    if os.path.exists(file): os.remove(file)
+                return pdf_bytes_dash
+
+            if st.button("📊 Proses PDF Operasional"):
+                with st.spinner("Menyiapkan dokumen elegan..."):
+                    st.session_state['pdf_dash_ready'] = buat_pdf_dashboard()
+                    st.success("PDF siap diunduh!")
+
+            if 'pdf_dash_ready' in st.session_state:
+                st.download_button(label="⬇️ Download PDF Operasional", data=st.session_state['pdf_dash_ready'], file_name="Laporan_Operasional_Klaster.pdf", mime="application/pdf")
+
+            # FITUR KEMBALI: Tombol Download Database CSV
+            st.markdown("---")
+            st.subheader("💾 Download Database Mentah")
+            csv = df_filtered.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Download Database Lengkap (.csv)", csv, "Database_Kepuasan_SMK.csv", "text/csv")
+
+
+        # ==========================================
+        # TAB 2: LAPORAN EKSEKUTIF (Untuk Kepsek)
+        # ==========================================
+        with tab2:
+            st.header("📑 Executive Summary")
+            st.markdown(f"Laporan ini merangkum hasil analisis kepuasan dari **{len(df_filtered)} responden**.")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.subheader("🕸️ Radar Chart Kinerja Global")
+                rata_global = {
+                    'Fasilitas': df_filtered['Fasilitas'].mean(),
+                    'Kurikulum': df_filtered['Kurikulum'].mean(),
+                    'Guru': df_filtered['Guru'].mean(),
+                    'Lingkungan': df_filtered['Lingkungan'].mean()
+                }
+                df_radar = pd.DataFrame(dict(Skor=list(rata_global.values()), Dimensi=list(rata_global.keys())))
+                fig_radar = px.line_polar(df_radar, r='Skor', theta='Dimensi', line_close=True, range_r=[0,5], markers=True)
+                fig_radar.update_traces(fill='toself', line_color='blue')
+                st.plotly_chart(fig_radar, use_container_width=True)
+
+            with col2:
+                klaster_terburuk = profile.mean(axis=1).idxmin()
+                df_kritis = df_filtered[df_filtered['Cluster'] == klaster_terburuk]
+                st.subheader(f"🍩 Proporsi Jurusan di Klaster Kritis (Klaster {klaster_terburuk})")
+                
+                fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.4, title="Dominasi Jurusan yang Banyak Komplain")
+                st.plotly_chart(fig_donut, use_container_width=True)
+
+            st.divider()
+
+            st.subheader("📋 Rapor Evaluasi 4 Dimensi Layanan")
+            rata_global_series = pd.Series(rata_global).sort_values() 
+
+            for dimensi, skor_dimensi in rata_global_series.items():
+                cols_dimensi = dimensi_map[dimensi]
+                rata_item_dimensi = df_filtered[cols_dimensi].mean()
+                item_terendah = rata_item_dimensi.idxmin()
+                skor_item_terendah = rata_item_dimensi.min()
+
+                isi_masalah, solusi_masalah = kamus_masalah[item_terendah], kamus_solusi[item_terendah]
+
+                if skor_dimensi >= 4.0:
+                    status, warna_alert = "Sangat Memuaskan 🌟", st.success
+                    pesan = f"**Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}**\n\n💡 **Saran Preventif:** Perhatikan poin *'{isi_masalah}'* (Skor: {skor_item_terendah:.2f}). **Tindakan:** {solusi_masalah}"
+                else:
+                    if skor_dimensi >= 3.0: status, warna_alert = "Cukup Memuaskan 🔵", st.info
+                    elif skor_dimensi >= 2.0: status, warna_alert = "Perlu Perbaikan 🟠", st.warning
+                    else: status, warna_alert = "Kritis (Perbaikan Segera!) 🔴", st.error
+                    pesan = f"**Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}**\n\n🚨 **Titik Terlemah:** *'{isi_masalah}'* (Skor: **{skor_item_terendah:.2f}**).\n\n🛠️ **Tindakan:** {solusi_masalah}"
+                
+                warna_alert(pesan)
+
+            # --- PDF TAB 2 (EKSEKUTIF) ---
+            st.markdown("---")
+            st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
+            def buat_pdf():
+                # Paksa tema putih
+                fig_radar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white")
+                fig_radar.write_image("temp_radar.png", engine="kaleido", width=600, height=400)
+                
+                fig_donut.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white")
+                fig_donut.write_image("temp_donut.png", engine="kaleido", width=500, height=400)
+                
+                pdf = FPDF()
+                pdf.add_page()
+                
+                # Header Eksekutif
+                pdf.set_font("Arial", 'B', 18)
+                pdf.cell(0, 10, txt="EXECUTIVE SUMMARY: KEPUASAN SISWA", ln=True, align='C')
+                pdf.set_font("Arial", 'B', 14)
+                pdf.cell(0, 8, txt="SMK NEGERI 1 DAWUAN", ln=True, align='C')
+                pdf.line(10, 30, 200, 30)
+                pdf.ln(5)
+                
+                # Demografi
+                pdf.set_font("Arial", '', 11)
+                teks_demo = f"Laporan ini merupakan hasil komputasi algoritma Machine Learning terhadap {len(df_filtered)} siswa."
+                pdf.multi_cell(0, 6, txt=teks_demo)
+                pdf.ln(5)
+                
+                # Visualisasi (Dua grafik berdampingan)
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, txt="A. Pemetaan Kinerja & Profiling Kritis:", ln=True)
+                pdf.image("temp_radar.png", x=10, y=55, w=100)
+                pdf.image("temp_donut.png", x=110, y=55, w=90)
+                pdf.ln(70) # Lompat ke bawah grafik
+                
+                # Rapor Dimensi (Berwarna)
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, txt="B. Rapor Evaluasi 4 Dimensi Layanan:", ln=True)
+                
+                for dimensi, skor_dimensi in rata_global_series.items():
+                    if skor_dimensi >= 4.0: status_pdf, r, g, b = "SANGAT MEMUASKAN", 0, 150, 0
+                    elif skor_dimensi >= 3.0: status_pdf, r, g, b = "CUKUP MEMUASKAN", 0, 0, 200
+                    elif skor_dimensi >= 2.0: status_pdf, r, g, b = "PERLU PERBAIKAN", 200, 100, 0
+                    else: status_pdf, r, g, b = "KRITIS", 220, 0, 0
+
+                    pdf.set_font("Arial", 'B', 11)
+                    pdf.set_text_color(0, 0, 0)
+                    pdf.cell(40, 7, txt=f"- {dimensi}:", ln=False)
+                    pdf.cell(30, 7, txt=f"Skor {skor_dimensi:.2f}", ln=False)
+                    
+                    pdf.set_text_color(r, g, b)
+                    pdf.cell(0, 7, txt=f"[{status_pdf}]", ln=True)
+                
+                pdf.set_text_color(0, 0, 0)
+                pdf.ln(5)
+                
+                # Fokus Perbaikan
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, txt="C. Fokus Perbaikan & Solusi Manajerial:", ln=True)
+                
+                for dimensi, skor_dimensi in rata_global_series.items():
+                    if skor_dimensi < 4.0: 
+                        cols_dimensi = dimensi_map[dimensi]
+                        rata_item_dimensi = df_filtered[cols_dimensi].mean()
+                        item_terendah = rata_item_dimensi.idxmin()
+                        
+                        teks_masalah = kamus_masalah[item_terendah]
+                        teks_solusi = kamus_solusi[item_terendah]
+                        
+                        pdf.set_font("Arial", 'B', 11)
+                        pdf.cell(0, 7, txt=f">> Masalah Utama pada {dimensi}:", ln=True)
+                        pdf.set_font("Arial", '', 10)
+                        pdf.multi_cell(0, 5, txt=f"Keluhan Siswa: {teks_masalah}")
+                        pdf.multi_cell(0, 5, txt=f"Saran Tindakan: {teks_solusi}")
+                        pdf.ln(3)
+
+                pdf.output("temp_laporan.pdf")
+                with open("temp_laporan.pdf", "rb") as f:
+                    pdf_bytes = f.read()
+                    
+                for file in ["temp_radar.png", "temp_donut.png", "temp_laporan.pdf"]:
+                    if os.path.exists(file): os.remove(file)
+                return pdf_bytes
+
+            if st.button("📄 Proses PDF Eksekutif"):
+                with st.spinner("Meracik laporan eksekutif lengkap..."):
+                    st.session_state['pdf_ready'] = buat_pdf()
+                    st.success("PDF Eksekutif berhasil dibuat!")
+
+            if 'pdf_ready' in st.session_state:
+                st.download_button(label="⬇️ Download Laporan Kepsek (PDF)", data=st.session_state['pdf_ready'], file_name="Laporan_Manajerial_SMK.pdf", mime="application/pdf")
 
 else:
     st.info("Silakan unggah file Excel (.xlsx) atau CSV hasil Google Forms.")
