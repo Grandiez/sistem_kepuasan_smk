@@ -11,7 +11,7 @@ from sklearn.preprocessing import StandardScaler
 st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide", initial_sidebar_state="expanded")
 
 # ==========================================
-# 💎 CUSTOM CSS: LIQUID GLASS (GLASSMORPHISM)
+# 💎 CUSTOM CSS: LIQUID GLASS & HIGH CONTRAST TEXT
 # ==========================================
 glass_css = """
 <style>
@@ -19,65 +19,190 @@ glass_css = """
 .stApp {
     background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     background-attachment: fixed;
-    color: white;
-}
-
-/* 2. Sidebar Efek Kaca */
-[data-testid="stSidebar"] {
-    background: rgba(255, 255, 255, 0.03) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* 3. Efek Kaca pada Kotak Metrik (Angka-angka atas) */
-[data-testid="metric-container"] {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-}
-
-/* 4. Kotak Menu Lipat (Expander) */
-[data-testid="stExpander"] {
-    background: rgba(255, 255, 255, 0.03) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
-}
-
-/* 5. Efek Kaca untuk Kotak Alert (Merah, Kuning, Hijau) */
-/* Kita biarin warna aslinya, tapi tambahin efek blur dan glow kaca */
-div[data-testid="stAlert"] {
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 15px !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
-}
-
-/* 6. Tombol (Buttons) 3D Glass */
-div.stButton > button {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: white !important;
-    border-radius: 10px !important;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* 🌟 PENINGKATAN KETERBACAAN TEKS (HIGH CONTRAST SHADOW) 🌟 */
+p, span, label, li, div[data-testid="stMarkdownContainer"] {
+    text-shadow: 0px 1px 4px rgba(0, 0, 0, 0.9) !important;
+    letter-spacing: 0.2px;
+}
+h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0px 3px 8px rgba(0, 0, 0, 0.9), 0px 0px 15px rgba(255, 255, 255, 0.2) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+}
+[data-testid="stMetricValue"] {
+    text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.8), 0px 0px 20px rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 2. Sidebar Efek Kaca Volumetrik */
+[data-testid="stSidebar"] {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(20px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 3. Komponen Wadah (Metrics, Expander, Alerts) */
+[data-testid="metric-container"], 
+[data-testid="stExpander"], 
+div[data-testid="stAlert"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 20px !important;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.2), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.5), 
+        inset 0 -1px 0 rgba(255, 255, 255, 0.1), 
+        inset 0 0 20px 5px rgba(255, 255, 255, 0.05) !important;
+    overflow: hidden;
+}
+
+/* 4. Tombol (Buttons) */
+div.stButton > button {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(15px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    color: white !important;
+    border-radius: 50px !important;
+    transition: all 0.4s ease;
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 div.stButton > button:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-3px);
-    border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset -5px -5px 10px -5px rgba(255, 255, 255, 0.8), 
+        inset 0 2px 0 rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Bikin Header & Teks lebih bersinar */
-h1, h2, h3 {
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+/* 5. Area Dropzone File Uploader (Efek Sumur) */
+[data-testid="stFileUploadDropzone"] {
+    background: rgba(0, 0, 0, 0.3) !important; /* Dibuat gelap supaya teks uploader makin kelihatan */
+    backdrop-filter: blur(15px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(120%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow: 
+        inset 0 10px 20px rgba(0, 0, 0, 0.6), 
+        inset 0 -1px 5px rgba(255, 255, 255, 0.15) !important; 
+    transition: all 0.3s ease;
+}
+[data-testid="stFileUploadDropzone"]:hover {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+[data-testid="stFileUploadDropzone"] button {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 12px !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.4) !important;
+}
+
+/* 6. Kotak File Uploaded */
+[data-testid="stUploadedFile"] {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(15px) saturate(130%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 7. MultiSelect Dropdown (Jurusan, Kelas, JK) */
+[data-baseweb="select"] > div {
+    background: rgba(0, 0, 0, 0.2) !important; /* Efek gelap inset */
+    backdrop-filter: blur(15px) saturate(120%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+span[data-baseweb="tag"] {
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 8px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0,0,0,0.2) !important;
+    color: white !important;
+}
+
+/* 8. Slider Jumlah Klaster */
+[data-testid="stSliderTickBar"] {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 10px !important;
+}
+div[data-baseweb="slider"] div[role="slider"] {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 2px solid rgba(255, 255, 255, 1) !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.6), inset 0 0 5px rgba(0,0,0,0.3) !important;
+}
+
+/* 9. Penyesuaian Tabel Dataframe agar agak gelap dan kontras */
+[data-testid="stDataFrame"] {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 5px;
+}
+
+/* =========================================================
+   🔥 UPDATE: EFEK MENYALA (GLOW/BLOOM) SAAT DI-HOVER 🔥
+   ========================================================= */
+
+/* 1. Efek Menyala untuk Semua Tombol (Download, Proses, dll) */
+div.stButton > button:hover,
+div.stDownloadButton > button:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-3px) scale(1.02); /* Sedikit membesar biar lebih interaktif */
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    
+    /* Mekanisme Bias Optik (Bloom) Ekstrem [cite: 110, 114] */
+    box-shadow: 
+        0 0 25px rgba(255, 255, 255, 0.4), /* PENDENDARAN LUAR (OUTER GLOW) - Ini yang bikin menyala! */
+        0 8px 24px rgba(0, 0, 0, 0.3), /* Bayangan jatuh */
+        inset 0 0 20px rgba(255, 255, 255, 0.6), /* Cahaya menyebar di dalam tombol */
+        inset 0 2px 0 rgba(255, 255, 255, 0.9) !important; /* Silau keras di tepi atas */
+        
+    /* Bikin teks di dalam tombol ikut menyala tipis */
+    text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 2. Efek Menyala untuk Area Drag & Drop File Uploader */
+[data-testid="stFileUploadDropzone"]:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    
+    /* Sumurnya memancarkan cahaya dari dalam ke luar */
+    box-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.15), /* Outer glow tipis */
+        inset 0 0 30px rgba(255, 255, 255, 0.2), /* Inner glow terang */
+        inset 0 10px 20px rgba(0, 0, 0, 0.6) !important; /* Tetap pertahankan kedalaman sumur */
+}
+
+/* 3. Efek Menyala untuk Kotak Multiselect (Jurusan, Kelas) */
+[data-baseweb="select"] > div:hover {
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.2), /* Outer glow */
+        inset 0 0 15px rgba(255, 255, 255, 0.2), /* Inner glow */
+        inset 0 4px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 4. Efek Menyala untuk Pentolan Slider (Jumlah Klaster) */
+div[data-baseweb="slider"] div[role="slider"]:hover {
+    background: #ffffff !important;
+    transform: scale(1.2);
+    box-shadow: 
+        0 0 20px rgba(255, 255, 255, 1), /* Glow super terang di slider */
+        inset 0 0 5px rgba(0,0,0,0.2) !important;
 }
 </style>
 """
@@ -212,7 +337,6 @@ if uploaded_file is not None:
                 hover_data=['Nama', 'Kelas', 'Jurusan'], title=f"Visualisasi 3D ({len(df_filtered)} Siswa)",
                 labels={'color': 'Klaster'}
             )
-            # MAGIC UI: Bikin background grafik 3D transparan biar menyatu sama glass
             fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
             st.plotly_chart(fig_3d, use_container_width=True)
 
@@ -225,7 +349,6 @@ if uploaded_file is not None:
                 barmode='group', labels={'value': 'Skor (1-5)', 'variable': 'Dimensi', 'Label_Klaster': 'Kelompok'},
                 color_discrete_sequence=['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
             )
-            # MAGIC UI: Bikin background Bar Chart transparan
             fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
             st.plotly_chart(fig_bar, use_container_width=True)
 
@@ -287,7 +410,6 @@ if uploaded_file is not None:
             st.markdown("---")
             st.subheader("📥 Cetak Laporan Operasional (PDF)")
             def buat_pdf_dashboard():
-                # PDF Tetap Putih!
                 fig_bar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
                 fig_bar.write_image("temp_bar.png", engine="kaleido", width=1000, height=450)
                 
@@ -344,7 +466,6 @@ if uploaded_file is not None:
                 for file in ["temp_bar.png", "temp_dashboard.pdf"]:
                     if os.path.exists(file): os.remove(file)
                 
-                # Kembalikan ke tema kaca setelah foto selesai
                 fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 return pdf_bytes_dash
 
@@ -382,7 +503,6 @@ if uploaded_file is not None:
                 fig_radar = px.line_polar(df_radar, r='Skor', theta='Dimensi', line_close=True, range_r=[0,5], markers=True)
                 fig_radar.update_traces(fill='toself', line_color='cyan')
                 
-                # Bikin transparan
                 fig_radar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 st.plotly_chart(fig_radar, use_container_width=True)
 
@@ -393,7 +513,6 @@ if uploaded_file is not None:
                 
                 fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.4)
                 
-                # Bikin transparan
                 fig_donut.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 st.plotly_chart(fig_donut, use_container_width=True)
 
@@ -424,7 +543,6 @@ if uploaded_file is not None:
             st.markdown("---")
             st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
             def buat_pdf():
-                # Paksa tema putih untuk PDF
                 fig_radar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
                 fig_radar.write_image("temp_radar.png", engine="kaleido", width=600, height=400)
                 
@@ -497,7 +615,6 @@ if uploaded_file is not None:
                 for file in ["temp_radar.png", "temp_donut.png", "temp_laporan.pdf"]:
                     if os.path.exists(file): os.remove(file)
                 
-                # Kembalikan ke tema transparan setelah PDF selesai
                 fig_radar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 fig_donut.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 return pdf_bytes
@@ -512,4 +629,3 @@ if uploaded_file is not None:
 
 else:
     st.info("Silakan unggah file Excel (.xlsx) atau CSV hasil Google Forms.")
-
