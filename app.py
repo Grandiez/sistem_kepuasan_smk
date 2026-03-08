@@ -488,6 +488,7 @@ if uploaded_file is not None:
                         pdf.cell(0, 7, txt=f">> Masalah Utama pada {dimensi}:", ln=True)
                         pdf.set_font("Arial", '', 10)
                         pdf.multi_cell(0, 5, txt=f"Keluhan Siswa: {teks_masalah}")
+                        pdf.ln(2)
                         pdf.multi_cell(0, 5, txt=f"Saran Tindakan: {teks_solusi}")
                         pdf.ln(3)
 
@@ -511,3 +512,4 @@ if uploaded_file is not None:
 
 else:
     st.info("Silakan unggah file Excel (.xlsx) atau CSV hasil Google Forms.")
+
