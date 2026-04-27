@@ -247,6 +247,16 @@ if uploaded_file is not None:
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
 
+    # Tambahkan ini setelah kmeans.fit_predict
+    from sklearn.metrics import silhouette_score
+
+    if n_clusters >= 2:
+    skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
+    
+    with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
+        st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
+        st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
+        
     st.sidebar.header("3. Filter Data")
     list_jurusan = df['Jurusan'].unique().tolist()
     pilih_jurusan = st.sidebar.multiselect("Jurusan:", list_jurusan, default=list_jurusan)
