@@ -232,13 +232,13 @@ if uploaded_file is not None:
 
     pca = PCA(n_components=3)
     pca_data = pca.fit_transform(scaled_data)
-    # --- TAMBAHAN UNTUK SIDANG ---
-    variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
-    st.sidebar.info(f"🧠 PCA Retained Information: {variansi_terjelaskan:.2f}%")
     df['PC1'] = pca_data[:, 0]
     df['PC2'] = pca_data[:, 1]
     df['PC3'] = pca_data[:, 2]
-
+    # --- TAMBAHAN UNTUK SIDANG ---
+    variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
+    st.sidebar.info(f"🧠 PCA Retained Information: {variansi_terjelaskan:.2f}%")
+    
     st.sidebar.header("2. Konfigurasi Algoritma")
     gunakan_pca = st.sidebar.toggle("🟢 Aktifkan Reduksi PCA", value=True)
     data_untuk_kmeans = pca_data if gunakan_pca else scaled_data 
