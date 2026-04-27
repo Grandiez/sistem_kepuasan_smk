@@ -6,7 +6,7 @@ from fpdf import FPDF
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score # Dipindahkan ke atas agar rapi
+from sklearn.metrics import silhouette_score
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide", initial_sidebar_state="expanded")
@@ -250,7 +250,7 @@ if uploaded_file is not None:
         df['PC3'] = pca_data[:, 2]
         
         st.sidebar.info(f"👁️ Mode Visual Aktif.\nTotal Variansi: **{variansi_terjelaskan:.2f}%**")
-        tampilkan_3d = True # Izin menampilkan plot 3D
+        tampilkan_3d = True 
         
     else:
         # Mesin otomatis mencari jumlah komponen untuk mencapai variansi minimal 72%
@@ -259,9 +259,13 @@ if uploaded_file is not None:
         variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
         jumlah_dimensi_baru = pca.n_components_
         
+        # Ekstrak setidaknya 2 komponen pertama untuk Proyeksi Scatter 2D
+        df['PC1'] = pca_data[:, 0]
+        df['PC2'] = pca_data[:, 1]
+        
         st.sidebar.success(f"🎓 Mode Akademis Aktif.\nDimensi Terbentuk: **{jumlah_dimensi_baru} Komponen**\nTotal Variansi: **{variansi_terjelaskan:.2f}%**")
         st.sidebar.caption("⚠️ Grafik 3D dinonaktifkan karena dimensi ruang K-Means melebihi 3.")
-        tampilkan_3d = False # Matikan plot 3D
+        tampilkan_3d = False 
 
     # --- K-MEANS CLUSTERING ---
     st.sidebar.header("3. Konfigurasi Klastering")
@@ -349,7 +353,7 @@ if uploaded_file is not None:
             for i, (cls, count) in enumerate(counts.items()):
                 cols[i].metric(f"Klaster {cls}", f"{count} Siswa")
 
-            # Menerapkan logika kondisional untuk plot 3D
+            # Menerapkan logika kondisional untuk plot 3D dan 2D
             if tampilkan_3d:
                 fig_3d = px.scatter_3d(
                     df_filtered, x='PC1', y='PC2', z='PC3', color=df_filtered['Cluster'].astype(str),
@@ -359,7 +363,20 @@ if uploaded_file is not None:
                 fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
                 st.plotly_chart(fig_3d, use_container_width=True)
             else:
-                st.info(f"🌌 Tampilan 3D Scatter Plot otomatis disembunyikan. Algoritma saat ini memetakan jarak data dalam ruang **{pca.n_components_} dimensi** untuk mengamankan {variansi_terjelaskan:.2f}% informasi asli. Hasil pemetaan manajerial (rapor klaster) tetap akurat di bawah ini.")
+                st.info(f"🌌 Algoritma saat ini beroperasi di ruang **{pca.n_components_} dimensi** untuk mengamankan **{variansi_terjelaskan:.2f}%** informasi asli. Tampilan spasial dikonversi menjadi Proyeksi 2D Utama.")
+                
+                # --- PENGGANTI: PROYEKSI 2D SCATTER PLOT ---
+                st.markdown("**📉 Proyeksi 2D (Komponen Utama 1 vs Komponen Utama 2)**")
+                fig_2d = px.scatter(
+                    df_filtered, x='PC1', y='PC2', color=df_filtered['Cluster'].astype(str),
+                    hover_data=['Nama', 'Kelas', 'Jurusan'], 
+                    labels={'color': 'Klaster'},
+                    title="Bayangan Klaster di Dimensi Terbesar (PC1 & PC2)"
+                )
+                fig_2d.update_traces(marker=dict(size=8, line=dict(width=1, color='DarkSlateGrey')))
+                fig_2d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
+                st.plotly_chart(fig_2d, use_container_width=True)
+                st.caption("💡 *Grafik di atas adalah proyeksi (bayangan) 2D dari algoritma multi-dimensi. Posisi titik mewakili sebaran siswa secara garis besar.*")
 
             st.subheader("📈 Perbandingan Skor Rata-rata per Klaster")
             profile_reset = profile.reset_index()
