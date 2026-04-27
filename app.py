@@ -235,6 +235,7 @@ if uploaded_file is not None:
     df['PC1'] = pca_data[:, 0]
     df['PC2'] = pca_data[:, 1]
     df['PC3'] = pca_data[:, 2]
+    
     # --- TAMBAHAN UNTUK SIDANG ---
     variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
     st.sidebar.info(f"🧠 PCA Retained Information: {variansi_terjelaskan:.2f}%")
@@ -250,10 +251,10 @@ if uploaded_file is not None:
     # Tambahkan ini setelah kmeans.fit_predict
     from sklearn.metrics import silhouette_score
     if n_clusters >= 2:
-    skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
-    with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
-        st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
-        st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
+        skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
+        with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
+            st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
+            st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
         
     st.sidebar.header("3. Filter Data")
     list_jurusan = df['Jurusan'].unique().tolist()
@@ -622,4 +623,3 @@ if uploaded_file is not None:
 
 else:
     st.info("Silakan unggah file Excel (.xlsx) atau CSV hasil Google Forms.")
-
