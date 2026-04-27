@@ -249,10 +249,8 @@ if uploaded_file is not None:
 
     # Tambahkan ini setelah kmeans.fit_predict
     from sklearn.metrics import silhouette_score
-
     if n_clusters >= 2:
     skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
-    
     with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
         st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
         st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
