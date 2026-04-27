@@ -6,6 +6,7 @@ from fpdf import FPDF
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score # Dipindahkan ke atas agar rapi
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide", initial_sidebar_state="expanded")
@@ -230,17 +231,40 @@ if uploaded_file is not None:
     scaler = StandardScaler()
     scaled_data = scaler.fit_transform(data_numeric)
 
-    pca = PCA(n_components=3)
-    pca_data = pca.fit_transform(scaled_data)
-    df['PC1'] = pca_data[:, 0]
-    df['PC2'] = pca_data[:, 1]
-    df['PC3'] = pca_data[:, 2]
-    
-    # --- TAMBAHAN UNTUK SIDANG ---
-    variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
-    st.sidebar.info(f"🧠 PCA Retained Information: {variansi_terjelaskan:.2f}%")
-    
-    st.sidebar.header("2. Konfigurasi Algoritma")
+    # ==========================================
+    # 🧠 LOGIKA SWITCH PCA (VISUALISASI VS AKADEMIS)
+    # ==========================================
+    st.sidebar.header("2. Mode Konfigurasi PCA")
+    mode_pca = st.sidebar.radio(
+        "Pilih Target Reduksi Dimensi:",
+        ["Mode Visualisasi 3D (3 Komponen)", "Mode Validasi Akademis (Target >70%)"]
+    )
+
+    if mode_pca == "Mode Visualisasi 3D (3 Komponen)":
+        pca = PCA(n_components=3)
+        pca_data = pca.fit_transform(scaled_data)
+        variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
+        
+        df['PC1'] = pca_data[:, 0]
+        df['PC2'] = pca_data[:, 1]
+        df['PC3'] = pca_data[:, 2]
+        
+        st.sidebar.info(f"👁️ Mode Visual Aktif.\nTotal Variansi: **{variansi_terjelaskan:.2f}%**")
+        tampilkan_3d = True # Izin menampilkan plot 3D
+        
+    else:
+        # Mesin otomatis mencari jumlah komponen untuk mencapai variansi minimal 72%
+        pca = PCA(n_components=0.72) 
+        pca_data = pca.fit_transform(scaled_data)
+        variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
+        jumlah_dimensi_baru = pca.n_components_
+        
+        st.sidebar.success(f"🎓 Mode Akademis Aktif.\nDimensi Terbentuk: **{jumlah_dimensi_baru} Komponen**\nTotal Variansi: **{variansi_terjelaskan:.2f}%**")
+        st.sidebar.caption("⚠️ Grafik 3D dinonaktifkan karena dimensi ruang K-Means melebihi 3.")
+        tampilkan_3d = False # Matikan plot 3D
+
+    # --- K-MEANS CLUSTERING ---
+    st.sidebar.header("3. Konfigurasi Klastering")
     gunakan_pca = st.sidebar.toggle("🟢 Aktifkan Reduksi PCA", value=True)
     data_untuk_kmeans = pca_data if gunakan_pca else scaled_data 
 
@@ -248,15 +272,14 @@ if uploaded_file is not None:
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
     df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
 
-    # Tambahkan ini setelah kmeans.fit_predict
-    from sklearn.metrics import silhouette_score
     if n_clusters >= 2:
         skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
         with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
             st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
             st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
         
-    st.sidebar.header("3. Filter Data")
+    # --- FILTER DATA ---
+    st.sidebar.header("4. Filter Data")
     list_jurusan = df['Jurusan'].unique().tolist()
     pilih_jurusan = st.sidebar.multiselect("Jurusan:", list_jurusan, default=list_jurusan)
     list_kelas = sorted(df['Kelas'].unique().tolist()) 
@@ -326,13 +349,17 @@ if uploaded_file is not None:
             for i, (cls, count) in enumerate(counts.items()):
                 cols[i].metric(f"Klaster {cls}", f"{count} Siswa")
 
-            fig_3d = px.scatter_3d(
-                df_filtered, x='PC1', y='PC2', z='PC3', color=df_filtered['Cluster'].astype(str),
-                hover_data=['Nama', 'Kelas', 'Jurusan'], title=f"Visualisasi 3D ({len(df_filtered)} Siswa)",
-                labels={'color': 'Klaster'}
-            )
-            fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
-            st.plotly_chart(fig_3d, use_container_width=True)
+            # Menerapkan logika kondisional untuk plot 3D
+            if tampilkan_3d:
+                fig_3d = px.scatter_3d(
+                    df_filtered, x='PC1', y='PC2', z='PC3', color=df_filtered['Cluster'].astype(str),
+                    hover_data=['Nama', 'Kelas', 'Jurusan'], title=f"Visualisasi 3D ({len(df_filtered)} Siswa)",
+                    labels={'color': 'Klaster'}
+                )
+                fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
+                st.plotly_chart(fig_3d, use_container_width=True)
+            else:
+                st.info(f"🌌 Tampilan 3D Scatter Plot otomatis disembunyikan. Algoritma saat ini memetakan jarak data dalam ruang **{pca.n_components_} dimensi** untuk mengamankan {variansi_terjelaskan:.2f}% informasi asli. Hasil pemetaan manajerial (rapor klaster) tetap akurat di bawah ini.")
 
             st.subheader("📈 Perbandingan Skor Rata-rata per Klaster")
             profile_reset = profile.reset_index()
