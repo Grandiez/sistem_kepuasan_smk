@@ -6,4 +6,6 @@ matplotlib
 openpyxl
 fpdf2
 kaleido==0.2.1
-supabase==2.3.0
+supabase>=2.4.0
+httpx>=0.27.0
+httpcore>=1.0.0
