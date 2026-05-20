@@ -484,7 +484,10 @@ elif menu == "Dashboard Analisis (Admin)":
             with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
                 st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
                 st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
-            
+
+        # Kunci random_state ke angka tertentu (misal: 42)
+        kmeans = KMeans(n_clusters=3, random_state=42) 
+        kmeans.fit(data_pca)
         # --- FILTER DATA ---
         st.sidebar.header("4. Filter Data")
         list_jurusan = df['Jurusan'].unique().tolist()
