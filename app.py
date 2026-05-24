@@ -479,11 +479,23 @@ elif menu == "Dashboard Analisis (Admin)":
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
 
+        # ======== BAGIAN YANG DIUPDATE ========
         if n_clusters >= 2:
             skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
-            with st.sidebar.expander("🔬 Validasi Matematis (K-Means)"):
-                st.write(f"Silhouette Score (k={n_clusters}): **{skor_siluet:.3f}**")
-                st.caption("Semakin mendekati 1.0, semakin optimal pemisahan klaster.")
+            st.sidebar.markdown("---")
+            st.sidebar.subheader("🔬 Validasi K-Means")
+            
+            # Menampilkan score menggunakan komponen Metric agar glowing
+            st.sidebar.metric(label=f"Silhouette Score (K={n_clusters})", value=f"{skor_siluet:.3f}")
+            
+            # Memberikan indikasi dinamis
+            if skor_siluet >= 0.5:
+                st.sidebar.success("✅ Struktur klaster sangat baik dan terpisah jelas.")
+            elif skor_siluet >= 0.25:
+                st.sidebar.info("🔵 Struktur klaster cukup baik.")
+            else:
+                st.sidebar.warning("⚠️ Batas antar klaster kurang tegas (overlapping).")
+        # ======================================
 
         # --- FILTER DATA ---
         st.sidebar.header("4. Filter Data")
