@@ -28,197 +28,175 @@ def init_connection():
 supabase = init_connection()
 
 # ==========================================
-# 💎 CUSTOM CSS: LIQUID GLASS & HIGH CONTRAST TEXT
+# 💎 CUSTOM CSS: ULTRA-LIQUID GLASS (macOS/iOS Style)
 # ==========================================
 glass_css = """
 <style>
-/* 1. Background Animasi / Gradient Premium */
+/* 1. Background Dinamis & Font Sistem macOS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
 .stApp {
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    /* GANTI URL DI BAWAH DENGAN LINK GAMBAR BACKGROUND LU ATAU PATH LOKAL */
+    background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); 
+    background-size: cover;
+    background-position: center;
     background-attachment: fixed;
-    color: white !important;
+    /* Overlay gelap biar teks tetap kebaca di atas neon */
+    background-color: rgba(10, 10, 15, 0.4); 
+    background-blend-mode: overlay;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* 🌟 PENINGKATAN KETERBACAAN TEKS (HIGH CONTRAST SHADOW) 🌟 */
-p, span, label, li, div[data-testid="stMarkdownContainer"] {
-    text-shadow: 0px 1px 4px rgba(0, 0, 0, 0.9) !important;
-    letter-spacing: 0.2px;
-}
-h1, h2, h3, h4, h5, h6 {
-    text-shadow: 0px 3px 8px rgba(0, 0, 0, 0.9), 0px 0px 15px rgba(255, 255, 255, 0.2) !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.5px;
-}
-[data-testid="stMetricValue"] {
-    text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.8), 0px 0px 20px rgba(255, 255, 255, 0.4) !important;
-}
-
-/* 2. Sidebar Efek Kaca Volumetrik */
-[data-testid="stSidebar"] {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(20px) saturate(120%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.1);
-}
-
-/* 3. Komponen Wadah (Metrics, Expander, Alerts, Form) */
+/* 2. Kapsul Mengambang (Form, Metric, Expander) - Konsep "Bezel Lip" kube.io */
+[data-testid="stForm"], 
 [data-testid="metric-container"], 
-[data-testid="stExpander"], 
+[data-testid="stExpander"],
 div[data-testid="stAlert"],
-[data-testid="stForm"] {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(20px) saturate(120%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 20px !important;
+[data-testid="stFileUploadDropzone"] {
+    background: rgba(30, 30, 35, 0.4) !important; /* Kaca gelap tembus pandang */
+    backdrop-filter: blur(25px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+    border-radius: 28px !important; /* Bentuk Kapsul/Rounded tebal */
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    
+    /* Kombinasi Shadow: Drop shadow lembut + Inset atas (Cahaya) + Inset bawah (Bayangan tebal) */
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.2), 
-        inset 0 1px 0 rgba(255, 255, 255, 0.5), 
-        inset 0 -1px 0 rgba(255, 255, 255, 0.1), 
-        inset 0 0 20px 5px rgba(255, 255, 255, 0.05) !important;
+        0 30px 60px rgba(0, 0, 0, 0.4), 
+        inset 0 1px 1px rgba(255, 255, 255, 0.15), 
+        inset 0 -1px 1px rgba(0, 0, 0, 0.6),
+        inset 0 4px 20px rgba(255, 255, 255, 0.02) !important;
+        
+    /* Transisi Spring/Cubic-Bezier ala iOS */
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.5s ease !important;
     overflow: hidden;
 }
 
-/* 4. PENYATUAN SEMUA TOMBOL (REGULER, DOWNLOAD, & BROWSE FILE) */
+/* Hover Kapsul: Kaca sedikit ngangkat dan nangkep cahaya */
+[data-testid="stForm"]:hover, 
+[data-testid="stExpander"]:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 40px 70px rgba(0, 0, 0, 0.6), 
+        inset 0 1px 2px rgba(255, 255, 255, 0.25), 
+        inset 0 -1px 1px rgba(0, 0, 0, 0.6),
+        inset 0 4px 20px rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 3. Typography & Text Shadow (Glow Lembut) */
+h1, h2, h3, h4, p, label, span, li, div[data-testid="stMarkdownContainer"] {
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8) !important;
+    letter-spacing: 0.3px;
+}
+h1, h2, h3 {
+    font-weight: 700 !important;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 255, 255, 0.15) !important;
+}
+
+/* 4. Sliders (Interaktif & Smooth) - Concave Track & Convex Knob */
+[data-testid="stSliderTickBar"] {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border-radius: 10px !important;
+    /* Track slider dibikin cekung (masuk ke dalam) */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.6), inset 0 -1px 1px rgba(255,255,255,0.08) !important; 
+}
+div[data-baseweb="slider"] div[role="slider"] {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    /* Knob slider dibikin cembung (nimbul) */
+    box-shadow: 
+        0 4px 10px rgba(0,0,0,0.4),
+        inset 0 -2px 4px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,1) !important;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s ease !important;
+}
+div[data-baseweb="slider"] div[role="slider"]:hover {
+    transform: scale(1.2) !important;
+    background: #ffffff !important;
+    box-shadow: 
+        0 6px 15px rgba(0,0,0,0.5),
+        inset 0 -2px 4px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,1) !important;
+}
+
+/* 5. Tombol (Glow & Tekanan Fisik) */
 div.stButton > button,
 div.stDownloadButton > button,
-[data-testid="stFileUploadDropzone"] button,
 [data-testid="baseButton-formSubmit"] {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(15px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(15px) saturate(150%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 50px !important; /* Full rounded ala pil */
     color: white !important;
-    border-radius: 50px !important; 
-    transition: all 0.4s ease !important;
-    box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.2) !important;
     font-weight: 600 !important;
-    letter-spacing: 0.5px !important;
+    
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.4) !important;
+        
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Tombol Submit Form Khusus Biru Glow */
 [data-testid="baseButton-formSubmit"] {
-    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
-    border: none !important;
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.2) 100%) !important;
+    border: 1px solid rgba(0, 242, 254, 0.4) !important;
 }
 
-/* Efek Menyala (Glow/Bloom) Seragam saat Tombol di-Hover */
+/* Hover Tombol */
 div.stButton > button:hover,
 div.stDownloadButton > button:hover,
-[data-testid="stFileUploadDropzone"] button:hover,
 [data-testid="baseButton-formSubmit"]:hover {
-    background: rgba(255, 255, 255, 0.25) !important;
-    transform: translateY(-3px) scale(1.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-2px) scale(1.02) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
     box-shadow: 
-        0 0 25px rgba(255, 255, 255, 0.4), 
-        0 8px 24px rgba(0, 0, 0, 0.3), 
-        inset 0 0 20px rgba(255, 255, 255, 0.6), 
-        inset 0 2px 0 rgba(255, 255, 255, 0.9) !important; 
-    text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.9) !important;
+        0 12px 25px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Efek saat Tombol diklik (Active - Menekan ke dalam) */
+/* Active Tombol (Efek Ditekan ke Dalam) */
 div.stButton > button:active,
 div.stDownloadButton > button:active,
-[data-testid="stFileUploadDropzone"] button:active,
 [data-testid="baseButton-formSubmit"]:active {
-    transform: translateY(1px) scale(0.98) !important;
+    transform: translateY(2px) scale(0.96) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
     box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.2),
-        inset 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+        0 2px 5px rgba(0, 0, 0, 0.3),
+        inset 0 4px 10px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* 5. Area Dropzone File Uploader (Efek Sumur & Hover) */
-[data-testid="stFileUploadDropzone"] {
-    background: rgba(0, 0, 0, 0.3) !important; 
-    backdrop-filter: blur(15px) saturate(120%) !important;
-    -webkit-backdrop-filter: blur(15px) saturate(120%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 20px !important;
-    box-shadow: 
-        inset 0 10px 20px rgba(0, 0, 0, 0.6), 
-        inset 0 -1px 5px rgba(255, 255, 255, 0.15) !important; 
-    transition: all 0.3s ease;
-}
-[data-testid="stFileUploadDropzone"]:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 
-        0 0 30px rgba(255, 255, 255, 0.15), 
-        inset 0 0 30px rgba(255, 255, 255, 0.2), 
-        inset 0 10px 20px rgba(0, 0, 0, 0.6) !important; 
-}
-
-/* 6. Kotak File Uploaded */
-[data-testid="stUploadedFile"] {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(15px) saturate(130%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
-}
-
-/* 7. MultiSelect Dropdown & Text Input Hover */
+/* 6. Inputs & Dropdowns */
 [data-baseweb="select"] > div, [data-baseweb="input"] > div {
-    background: rgba(0, 0, 0, 0.2) !important; 
-    backdrop-filter: blur(15px) saturate(120%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 12px !important;
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255, 255, 255, 0.2) !important;
-    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.3) !important; 
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 16px !important;
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     color: white !important;
 }
 [data-baseweb="select"] > div:hover, [data-baseweb="input"] > div:hover {
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 
-        0 0 15px rgba(255, 255, 255, 0.2), 
-        inset 0 0 15px rgba(255, 255, 255, 0.2), 
-        inset 0 4px 10px rgba(0, 0, 0, 0.4) !important;
-}
-span[data-baseweb="tag"] {
-    background: rgba(255, 255, 255, 0.2) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 8px !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0,0,0,0.2) !important;
-    color: white !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 255, 255, 0.1) !important;
 }
 
-/* 8. Slider Jumlah Klaster & Hover */
-[data-testid="stSliderTickBar"] {
-    background: rgba(255, 255, 255, 0.3) !important;
-    border-radius: 10px !important;
-}
-div[data-baseweb="slider"] div[role="slider"] {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border: 2px solid rgba(255, 255, 255, 1) !important;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.6), inset 0 0 5px rgba(0,0,0,0.3) !important;
-    transition: all 0.2s ease;
-}
-div[data-baseweb="slider"] div[role="slider"]:hover {
-    background: #ffffff !important;
-    transform: scale(1.2);
-    box-shadow: 
-        0 0 20px rgba(255, 255, 255, 1), 
-        inset 0 0 5px rgba(0,0,0,0.2) !important;
-}
-
-/* 9. Penyesuaian Tabel Dataframe agar agak gelap dan kontras */
-[data-testid="stDataFrame"] {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    padding: 5px;
+/* 7. Sidebar Kaca Tebal */
+[data-testid="stSidebar"] {
+    background: rgba(15, 15, 20, 0.5) !important;
+    backdrop-filter: blur(30px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
 }
 </style>
 """
 st.markdown(glass_css, unsafe_allow_html=True)
 # ==========================================
-
 # --- MENU NAVIGASI SIDEBAR ---
 st.sidebar.title("Navigasi Sistem")
 menu = st.sidebar.selectbox("Pilih Halaman", ["Isi Kuesioner (Siswa)", "Dashboard Analisis (Admin)"])
