@@ -188,11 +188,6 @@ div.stDownloadButton > button:hover {
    FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
    ========================================== */
 
-header[data-testid="stHeader"] {
-    visibility: hidden !important;
-    height: 0px !important;
-}
-
 /* 2. Sembunyikan Footer Streamlit */
 footer {
     display: none !important;
