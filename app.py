@@ -184,6 +184,35 @@ div.stDownloadButton > button:hover {
     border-color: rgba(255, 255, 255, 0.4) !important;
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
 }
+/* ==========================================
+   FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
+   ========================================== */
+
+/* 1. Sembunyikan Header Bawaan Streamlit (Bar "Fork", GitHub, Menu) */
+header[data-testid="stHeader"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0px !important;
+}
+
+/* 2. Sembunyikan Footer Streamlit */
+footer {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 3. Pangkas Ruang Kosong (Padding) Bawaan di Atas dan Bawah */
+.block-container {
+    padding-top: 2rem !important; /* Jarak aman agar konten tidak nabrak "poni" HP */
+    padding-bottom: 1rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+/* 4. Fix Khusus Mobile (iOS/Safari Background Bug) */
+.stApp {
+    min-height: -webkit-fill-available !important; /* Memaksa tinggi menyesuaikan layar asli HP */
+}
 </style>
 """
 st.markdown(glass_css, unsafe_allow_html=True)
