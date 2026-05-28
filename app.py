@@ -55,7 +55,7 @@ glass_css = """
 /* 1. Background Dinamis & Reset Font */
 .stApp {
     /* GANTI URL DI BAWAH DENGAN GAMBAR NEON CYAN-PINK LU */
-    background-image: url('NAMA_FILE_LU_ATAU_URL_IMGUR.png'); 
+    background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); 
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
