@@ -28,7 +28,7 @@ def init_connection():
 supabase = init_connection()
 
 # ==========================================
-# 💎 CUSTOM CSS: PURE SMOOTH DARK GLASS (NO DISTORTION)
+# 💎 CUSTOM CSS: PURE SMOOTH DARK GLASS & TINTED ALERTS
 # ==========================================
 glass_css = """
 <style>
@@ -150,7 +150,96 @@ div[data-baseweb="slider"] > div > div > div {
     background: linear-gradient(90deg, rgba(0, 242, 254, 0.5), rgba(79, 172, 254, 0.8)) !important;
     box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
     border-radius: 20px !important;
-}div.stButton > button:active,
+}
+
+/* ==========================================
+   4. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER)
+   ========================================== */
+.glass-alert {
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 1.2rem;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    color: rgba(255, 255, 255, 0.95);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    /* Bayangan jatuh (ngambang) dan efek kedalaman dasar */
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.4),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+.glass-alert:hover {
+    transform: translateY(-2px);
+}
+
+/* Varian Kaca Hijau (Puas/Sangat Memuaskan) */
+.glass-green {
+    background: rgba(16, 185, 129, 0.15); 
+    border-top: 1px solid rgba(16, 185, 129, 0.4);
+    border-left: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(16, 185, 129, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Varian Kaca Biru (Cukup Memuaskan) */
+.glass-blue {
+    background: rgba(59, 130, 246, 0.15); 
+    border-top: 1px solid rgba(59, 130, 246, 0.4);
+    border-left: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(59, 130, 246, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Varian Kaca Oranye (Perlu Perbaikan) */
+.glass-orange {
+    background: rgba(245, 158, 11, 0.15); 
+    border-top: 1px solid rgba(245, 158, 11, 0.4);
+    border-left: 1px solid rgba(245, 158, 11, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(245, 158, 11, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Varian Kaca Merah (Kritis) */
+.glass-red {
+    background: rgba(239, 68, 68, 0.15); 
+    border-top: 1px solid rgba(239, 68, 68, 0.4);
+    border-left: 1px solid rgba(239, 68, 68, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(239, 68, 68, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* Style Tombol Form Biar Smooth */
+div.stButton > button,
+div.stDownloadButton > button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+div.stButton > button:hover,
+div.stDownloadButton > button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+div.stButton > button:active {
+    transform: translateY(1px) scale(0.98) !important;
+}
+[data-testid="baseButton-formSubmit"] {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.2) 100%) !important;
+    border: 1px solid rgba(0, 242, 254, 0.4) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+[data-testid="baseButton-formSubmit"]:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 8px 20px rgba(0, 242, 254, 0.4) !important;
+}
 [data-testid="baseButton-formSubmit"]:active {
     transform: translateY(1px) scale(0.98) !important;
 }
@@ -158,8 +247,7 @@ div[data-baseweb="slider"] > div > div > div {
 """
 st.markdown(glass_css, unsafe_allow_html=True)
 # ==========================================
-# ==========================================
-# (Lanjut ke kode koneksi database lu)# 
+
 # --- MENU NAVIGASI SIDEBAR ---
 st.sidebar.title("Navigasi Sistem")
 menu = st.sidebar.selectbox("Pilih Halaman", ["Isi Kuesioner (Siswa)", "Dashboard Analisis (Admin)"])
@@ -573,23 +661,35 @@ elif menu == "Dashboard Analisis (Admin)":
                     jurusan_terbanyak = df_cluster['Jurusan'].mode()[0] if not df_cluster.empty else "N/A"
                     jml_jurusan = len(df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak])
 
+                    # ========================================================
+                    # LOGIKA HTML TINTED GLASS UNTUK TAB 1
+                    # ========================================================
                     if skor_item >= 4.0:
-                        status, warna_alert = "Sangat Memuaskan 🌟", st.success
+                        status, glass_color = "Sangat Memuaskan 🌟", "glass-green"
                     elif skor_item >= 3.0:
-                        status, warna_alert = "Cukup Memuaskan 🔵", st.info
+                        status, glass_color = "Cukup Memuaskan 🔵", "glass-blue"
                     elif skor_item >= 2.0:
-                        status, warna_alert = "Perlu Perbaikan 🟠", st.warning
+                        status, glass_color = "Perlu Perbaikan 🟠", "glass-orange"
                     else:
-                        status, warna_alert = "Kritis (Perbaikan Segera!) 🔴", st.error
+                        status, glass_color = "Kritis (Perbaikan Segera!) 🔴", "glass-red"
 
                     if skor_item >= 4.0:
-                        pesan = f"**Klaster {cluster} (Dimensi: {dim_pilihan} - Status: {status})**\n\n✨ **Kondisi Aman:** Secara umum siswa di klaster ini sudah PUAS dengan **{dim_pilihan}**. Aspek terendah ada pada poin *'{isi_masalah}'* namun skornya masih sangat aman di angka **{skor_item:.2f}/5.00**.\n\n📈 **Saran:** Pertahankan kinerja. Preventif: {solusi_masalah}"
-                        warna_alert(pesan)
+                        pesan_html = f"""
+                        <b>Klaster {cluster} (Dimensi: {dim_pilihan} - Status: {status})</b><br><br>
+                        ✨ <b>Kondisi Aman:</b> Secara umum siswa di klaster ini sudah PUAS dengan <b>{dim_pilihan}</b>. Aspek terendah ada pada poin <i>'{isi_masalah}'</i> namun skornya masih sangat aman di angka <b>{skor_item:.2f}/5.00</b>.<br><br>
+                        📈 <b>Saran:</b> Pertahankan kinerja. Preventif: {solusi_masalah}
+                        """
+                        st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
                         with st.expander(f"📋 Lihat Daftar Mayoritas Siswa (Klaster {cluster})"):
                             st.write(f"Siswa di klaster ini tidak memerlukan investigasi mendalam untuk masalah {dim_pilihan}.")
                     else:
-                        pesan = f"**Klaster {cluster} (Dimensi: {dim_pilihan} - Status: {status})**\n\n👉 **Akar Masalah:** *{isi_masalah}* (Skor: **{skor_item:.2f}/5.00**).\n\n🛠️ **Rekomendasi Solusi:** {solusi_masalah}\n\n🎯 **Target Investigasi:** Fokus pada **Kelas {kelas_terbanyak}** ({jml_kelas} anak) dan **Jurusan {jurusan_terbanyak}** ({jml_jurusan} anak)."
-                        warna_alert(pesan)
+                        pesan_html = f"""
+                        <b>Klaster {cluster} (Dimensi: {dim_pilihan} - Status: {status})</b><br><br>
+                        👉 <b>Akar Masalah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item:.2f}/5.00</b>).<br><br>
+                        🛠️ <b>Rekomendasi Solusi:</b> {solusi_masalah}<br><br>
+                        🎯 <b>Target Investigasi:</b> Fokus pada <b>Kelas {kelas_terbanyak}</b> ({jml_kelas} anak) dan <b>Jurusan {jurusan_terbanyak}</b> ({jml_jurusan} anak).
+                        """
+                        st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
                         with st.expander(f"📋 Klik untuk Daftar Nama Target Investigasi (Klaster {cluster} - Kasus: {dim_pilihan})"):
                             df_kelas = df_cluster[df_cluster['Kelas'] == kelas_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
                             df_kelas.index += 1 
@@ -723,16 +823,23 @@ elif menu == "Dashboard Analisis (Admin)":
 
                     isi_masalah, solusi_masalah = kamus_masalah[item_terendah], kamus_solusi[item_terendah]
 
+                    # ========================================================
+                    # LOGIKA HTML TINTED GLASS UNTUK TAB 2
+                    # ========================================================
                     if skor_dimensi >= 4.0:
-                        status, warna_alert = "Sangat Memuaskan 🌟", st.success
-                        pesan = f"**Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}**\n\n💡 **Saran Preventif:** Perhatikan poin *'{isi_masalah}'* (Skor: {skor_item_terendah:.2f}). **Tindakan:** {solusi_masalah}"
+                        status, glass_color = "Sangat Memuaskan 🌟", "glass-green"
+                        pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br>💡 <b>Saran Preventif:</b> Perhatikan poin <i>'{isi_masalah}'</i> (Skor: {skor_item_terendah:.2f}). <b>Tindakan:</b> {solusi_masalah}"
                     else:
-                        if skor_dimensi >= 3.0: status, warna_alert = "Cukup Memuaskan 🔵", st.info
-                        elif skor_dimensi >= 2.0: status, warna_alert = "Perlu Perbaikan 🟠", st.warning
-                        else: status, warna_alert = "Kritis (Perbaikan Segera!) 🔴", st.error
-                        pesan = f"**Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}**\n\n🚨 **Titik Terlemah:** *'{isi_masalah}'* (Skor: **{skor_item_terendah:.2f}**).\n\n🛠️ **Tindakan:** {solusi_masalah}"
-                    
-                    warna_alert(pesan)
+                        if skor_dimensi >= 3.0: 
+                            status, glass_color = "Cukup Memuaskan 🔵", "glass-blue"
+                        elif skor_dimensi >= 2.0: 
+                            status, glass_color = "Perlu Perbaikan 🟠", "glass-orange"
+                        else: 
+                            status, glass_color = "Kritis (Perbaikan Segera!) 🔴", "glass-red"
+                            
+                        pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br>🚨 <b>Titik Terlemah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item_terendah:.2f}</b>).<br><br>🛠️ <b>Tindakan:</b> {solusi_masalah}"
+
+                    st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
 
                 st.markdown("---")
                 st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
