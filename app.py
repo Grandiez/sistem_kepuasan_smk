@@ -435,13 +435,22 @@ elif menu == "Dashboard Analisis (Admin)":
             tampilkan_3d = True 
             
         else:
+            # Mesin otomatis mencari jumlah komponen untuk mencapai variansi minimal 72%
             pca = PCA(n_components=0.72) 
             pca_data = pca.fit_transform(scaled_data)
             variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
             jumlah_dimensi_baru = pca.n_components_
             
+            # --- FIX INDEX ERROR ---
             df['PC1'] = pca_data[:, 0]
-            df['PC2'] = pca_data[:, 1]
+            
+            # Cek apakah PCA menghasilkan lebih dari 1 dimensi
+            if jumlah_dimensi_baru > 1:
+                df['PC2'] = pca_data[:, 1]
+            else:
+                # Jika cuma 1 dimensi, berikan nilai 0 agar grafik scatter 2D tidak crash
+                df['PC2'] = 0 
+            # -----------------------
             
             st.sidebar.success(f"Mode Akademis Aktif.\nDimensi: {jumlah_dimensi_baru}\nVariansi: {variansi_terjelaskan:.2f}%")
             st.sidebar.caption("Grafik 3D dinonaktifkan.")
