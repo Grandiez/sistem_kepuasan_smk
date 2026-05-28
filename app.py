@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import os
 import datetime
-from fpdf import FPDF
+import streamlit.components.v1 as components
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -184,9 +183,16 @@ div.stDownloadButton > button:hover {
     border-color: rgba(255, 255, 255, 0.4) !important;
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
 }
+
 /* ==========================================
    FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
    ========================================== */
+
+header[data-testid="stHeader"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0px !important;
+}
 
 /* 2. Sembunyikan Footer Streamlit */
 footer {
@@ -196,7 +202,7 @@ footer {
 
 /* 3. Pangkas Ruang Kosong (Padding) Bawaan di Atas dan Bawah */
 .block-container {
-    padding-top: 2rem !important; /* Jarak aman agar konten tidak nabrak "poni" HP */
+    padding-top: 2rem !important; 
     padding-bottom: 1rem !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
@@ -204,7 +210,31 @@ footer {
 
 /* 4. Fix Khusus Mobile (iOS/Safari Background Bug) */
 .stApp {
-    min-height: -webkit-fill-available !important; /* Memaksa tinggi menyesuaikan layar asli HP */
+    min-height: -webkit-fill-available !important; 
+}
+
+/* ==========================================
+   5. PRINT MODE (HTML TO PDF OPTIMIZATION)
+   ========================================== */
+@media print {
+    /* Paksa browser mencetak semua warna background dan efek */
+    html, body, .stApp, div {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Sembunyikan elemen yang tidak perlu ikut di-print (seperti sidebar dan header) */
+    [data-testid="stSidebar"], 
+    header[data-testid="stHeader"], 
+    footer {
+        display: none !important;
+    }
+
+    /* Hilangkan background image bawaan saat print agar lebih bersih (opsional) */
+    .stApp {
+        background-image: none !important;
+        background-color: #0b0b10 !important; /* Warna gelap solid */
+    }
 }
 </style>
 """
@@ -532,9 +562,6 @@ elif menu == "Dashboard Analisis (Admin)":
                 'Fasilitas': [f'P{i}' for i in range(1, 6)], 'Kurikulum': [f'P{i}' for i in range(6, 11)],
                 'Guru': [f'P{i}' for i in range(11, 16)], 'Lingkungan': [f'P{i}' for i in range(16, 21)]
             }
-
-            jml_pria = len(df_filtered[df_filtered['Jenis_Kelamin'].str.contains('Pria|Laki', case=False, na=False)])
-            jml_wanita = len(df_filtered) - jml_pria
             
             tab1, tab2 = st.tabs(["Dashboard Analisis", "Laporan Eksekutif"])
 
@@ -646,75 +673,35 @@ elif menu == "Dashboard Analisis (Admin)":
                             st.dataframe(df_jurusan, use_container_width=True)
 
                 st.markdown("---")
-                st.subheader("Cetak Laporan Operasional (PDF)")
+                st.subheader("📥 Cetak Laporan Operasional (PDF)")
+                st.info("💡 Klik tombol di bawah ini. Pastikan untuk mencentang opsi **'Background graphics' (Grafik Latar Belakang)** di pengaturan jendela *Print* agar tampilan kaca (Glass UI) tetap terlihat.")
                 
-                def buat_pdf_dashboard():
-                    fig_bar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
-                    fig_bar.write_image("temp_bar.png", engine="kaleido", width=1000, height=450)
-                    
-                    pdf = FPDF()
-                    pdf.add_page()
-                    
-                    pdf.set_font("Arial", 'B', 16)
-                    pdf.cell(0, 8, txt="LAPORAN OPERASIONAL KLASTER SISWA", ln=True, align='C')
-                    pdf.set_font("Arial", '', 11)
-                    pdf.cell(0, 6, txt=f"Dicetak melalui Sistem Analisis Kepuasan", ln=True, align='C')
-                    pdf.line(10, 25, 200, 25) 
-                    pdf.ln(10)
-                    
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.cell(0, 8, txt="1. Demografi Responden:", ln=True)
-                    pdf.set_font("Arial", '', 11)
-                    pdf.cell(0, 6, txt=f"- Total Siswa Dianalisis: {len(df_filtered)} Siswa", ln=True)
-                    pdf.cell(0, 6, txt=f"- Jenis Kelamin: Laki-laki ({jml_pria}), Perempuan ({jml_wanita})", ln=True)
-                    pdf.cell(0, 6, txt=f"- Jumlah Klaster Terbentuk: {n_clusters} Kelompok", ln=True)
-                    pdf.ln(5)
-
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.cell(0, 8, txt="2. Grafik Perbandingan Antar Klaster:", ln=True)
-                    pdf.image("temp_bar.png", x=10, w=190)
-                    pdf.ln(2)
-                    
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.cell(0, 10, txt="3. Rincian Temuan & Prioritas Perbaikan:", ln=True)
-                    
-                    for cluster in profile.index:
-                        dim_terendah = st.session_state.get(f"select_dim_{cluster}", profile.loc[cluster].idxmin())
-                        skor_terendah = profile.loc[cluster][dim_terendah]
-                        jml_siswa = len(df_filtered[df_filtered['Cluster'] == cluster])
-                        
-                        if skor_terendah >= 4.0: status_teks, r, g, b = "Sangat Memuaskan (Aman)", 0, 150, 0 
-                        elif skor_terendah >= 3.0: status_teks, r, g, b = "Cukup (Perlu Peningkatan)", 0, 0, 200 
-                        elif skor_terendah >= 2.0: status_teks, r, g, b = "Kurang (Perlu Perbaikan)", 200, 100, 0 
-                        else: status_teks, r, g, b = "Kritis (Perbaikan Segera!)", 220, 0, 0 
-
-                        pdf.set_font("Arial", 'B', 11)
-                        pdf.set_text_color(0, 0, 0)
-                        pdf.cell(25, 8, txt=f"> Klaster {cluster}: ", ln=False)
-                        pdf.set_text_color(r, g, b) 
-                        pdf.cell(0, 8, txt=status_teks, ln=True)
-                        
-                        pdf.set_text_color(0, 0, 0) 
-                        pdf.set_font("Arial", '', 10)
-                        pdf.cell(0, 6, txt=f"   - Jumlah Siswa: {jml_siswa} Orang", ln=True)
-                        pdf.cell(0, 6, txt=f"   - Prioritas Utama: Dimensi {dim_terendah} (Skor: {skor_terendah:.2f}/5.00)", ln=True)
-                        pdf.ln(2)
-
-                    pdf.output("temp_dashboard.pdf")
-                    with open("temp_dashboard.pdf", "rb") as f: pdf_bytes_dash = f.read()
-                    for file in ["temp_bar.png", "temp_dashboard.pdf"]:
-                        if os.path.exists(file): os.remove(file)
-                    
-                    fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
-                    return pdf_bytes_dash
-
-                if st.button("Proses PDF Operasional"):
-                    with st.spinner("Menyiapkan dokumen..."):
-                        st.session_state['pdf_dash_ready'] = buat_pdf_dashboard()
-                        st.success("PDF siap diunduh.")
-
-                if 'pdf_dash_ready' in st.session_state:
-                    st.download_button(label="Download PDF Operasional", data=st.session_state['pdf_dash_ready'], file_name="Laporan_Operasional_Klaster.pdf", mime="application/pdf")
+                # HTML Button Injection untuk trigger Print Browser
+                html_btn_1 = """
+                <style>
+                .print-btn {
+                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%);
+                    border: 1px solid rgba(96, 165, 250, 0.4);
+                    border-radius: 12px;
+                    color: white;
+                    padding: 12px 20px;
+                    font-size: 15px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    width: 100%;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    font-weight: 500;
+                }
+                .print-btn:hover {
+                    border-color: rgba(255, 255, 255, 0.6);
+                    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+                    transform: translateY(-2px);
+                }
+                </style>
+                <button class="print-btn" onclick="window.parent.print()">🖨️ Cetak Dashboard / Save as PDF</button>
+                """
+                components.html(html_btn_1, height=60)
 
                 st.markdown("---")
                 st.subheader("Download Database Mentah")
@@ -801,92 +788,32 @@ elif menu == "Dashboard Analisis (Admin)":
                     st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
 
                 st.markdown("---")
-                st.subheader("Cetak Laporan Eksekutif (PDF)")
+                st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
+                st.info("💡 Klik tombol di bawah ini untuk mencetak halaman Laporan Eksekutif ini menjadi PDF.")
                 
-                def buat_pdf():
-                    fig_radar.update_layout(template="plotly_white", polar=dict(bgcolor='white'), paper_bgcolor="white", plot_bgcolor="white", font_color="black")
-                    fig_radar.update_traces(line_color='blue', fillcolor='rgba(0, 0, 255, 0.1)')
-                    fig_radar.write_image("temp_radar.png", engine="kaleido", width=500, height=400)
-                    
-                    fig_donut.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
-                    fig_donut.update_traces(marker=dict(line=dict(color='white', width=2)))
-                    fig_donut.write_image("temp_donut.png", engine="kaleido", width=500, height=400)
-                    
-                    pdf = FPDF()
-                    pdf.add_page()
-                    
-                    pdf.set_font("Arial", 'B', 18)
-                    pdf.cell(0, 10, txt="EXECUTIVE SUMMARY: KEPUASAN SISWA", ln=True, align='C')
-                    pdf.line(10, 25, 200, 25)
-                    pdf.ln(5)
-                    
-                    pdf.set_font("Arial", '', 11)
-                    teks_demo = f"Laporan ini merupakan hasil komputasi data terhadap {len(df_filtered)} siswa."
-                    pdf.multi_cell(0, 6, txt=teks_demo)
-                    pdf.ln(5)
-                    
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.cell(0, 8, txt="A. Pemetaan Kinerja & Profiling Kritis:", ln=True)
-                    pdf.image("temp_radar.png", x=10, y=50, w=100)
-                    pdf.image("temp_donut.png", x=110, y=50, w=90)
-                    pdf.ln(70) 
-                    
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.cell(0, 8, txt="B. Rapor Evaluasi 4 Dimensi Layanan:", ln=True)
-                    
-                    for dimensi, skor_dimensi in rata_global_series.items():
-                        if skor_dimensi >= 4.0: status_pdf, r, g, b = "SANGAT MEMUASKAN", 0, 150, 0
-                        elif skor_dimensi >= 3.0: status_pdf, r, g, b = "CUKUP MEMUASKAN", 0, 0, 200
-                        elif skor_dimensi >= 2.0: status_pdf, r, g, b = "PERLU PERBAIKAN", 200, 100, 0
-                        else: status_pdf, r, g, b = "KRITIS", 220, 0, 0
-
-                        pdf.set_font("Arial", 'B', 11)
-                        pdf.set_text_color(0, 0, 0)
-                        pdf.cell(40, 7, txt=f"- {dimensi}:", ln=False)
-                        pdf.cell(30, 7, txt=f"Skor {skor_dimensi:.2f}", ln=False)
-                        
-                        pdf.set_text_color(r, g, b)
-                        pdf.cell(0, 7, txt=f"[{status_pdf}]", ln=True)
-                    
-                    pdf.set_text_color(0, 0, 0)
-                    pdf.ln(5)
-                    
-                    pdf.set_font("Arial", 'B', 12)
-                    pdf.cell(0, 8, txt="C. Fokus Perbaikan & Solusi Manajerial:", ln=True)
-                    
-                    for dimensi, skor_dimensi in rata_global_series.items():
-                        if skor_dimensi < 4.0: 
-                            cols_dimensi = dimensi_map[dimensi]
-                            rata_item_dimensi = df_filtered[cols_dimensi].mean()
-                            item_terendah = rata_item_dimensi.idxmin()
-                            
-                            teks_masalah = kamus_masalah[item_terendah]
-                            teks_solusi = kamus_solusi[item_terendah]
-                            
-                            pdf.set_font("Arial", 'B', 11)
-                            pdf.cell(0, 7, txt=f">> Masalah Utama pada {dimensi}:", ln=True)
-                            pdf.set_font("Arial", '', 10)
-                            pdf.multi_cell(0, 5, txt=f"Keluhan: {teks_masalah}")
-                            pdf.ln(2)
-                            pdf.multi_cell(0, 5, txt=f"Tindakan: {teks_solusi}")
-                            pdf.ln(3)
-
-                    pdf.output("temp_laporan.pdf")
-                    with open("temp_laporan.pdf", "rb") as f: pdf_bytes = f.read()
-                    for file in ["temp_radar.png", "temp_donut.png", "temp_laporan.pdf"]:
-                        if os.path.exists(file): os.remove(file)
-                    
-                    # Kembalikan warna dark theme untuk display
-                    fig_radar.update_traces(line_color='cyan', fillcolor='rgba(0, 242, 254, 0.2)')
-                    fig_radar.update_layout(polar=dict(bgcolor='rgba(15, 15, 20, 0.6)'), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
-                    fig_donut.update_traces(marker=dict(line=dict(color='rgba(18, 18, 24, 1)', width=3)))
-                    fig_donut.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
-                    return pdf_bytes
-
-                if st.button("Proses PDF Eksekutif"):
-                    with st.spinner("Meracik laporan eksekutif lengkap..."):
-                        st.session_state['pdf_ready'] = buat_pdf()
-                        st.success("PDF Eksekutif berhasil dibuat.")
-
-                if 'pdf_ready' in st.session_state:
-                    st.download_button(label="Download Laporan Manajerial (PDF)", data=st.session_state['pdf_ready'], file_name="Laporan_Manajerial.pdf", mime="application/pdf")
+                # HTML Button Injection untuk trigger Print Browser
+                html_btn_2 = """
+                <style>
+                .print-btn {
+                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.2) 100%);
+                    border: 1px solid rgba(52, 211, 153, 0.4);
+                    border-radius: 12px;
+                    color: white;
+                    padding: 12px 20px;
+                    font-size: 15px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    width: 100%;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    font-weight: 500;
+                }
+                .print-btn:hover {
+                    border-color: rgba(255, 255, 255, 0.6);
+                    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+                    transform: translateY(-2px);
+                }
+                </style>
+                <button class="print-btn" onclick="window.parent.print()">📄 Simpan Halaman Eksekutif ke PDF</button>
+                """
+                components.html(html_btn_2, height=60)
