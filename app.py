@@ -775,7 +775,7 @@ elif menu == "Dashboard Analisis (Admin)":
                 def buat_pdf():
                     fig_radar.update_layout(template="plotly_white", polar=dict(bgcolor='white'), paper_bgcolor="white", plot_bgcolor="white", font_color="black")
                     fig_radar.update_traces(line_color='blue', fillcolor='rgba(0, 0, 255, 0.1)')
-                    fig_radar.write_image("temp_radar.png", engine="kaleido", width=600, height=400)
+                    fig_radar.write_image("temp_radar.png", engine="kaleido", width=500, height=400)
                     
                     fig_donut.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
                     fig_donut.update_traces(marker=dict(line=dict(color='white', width=2)))
