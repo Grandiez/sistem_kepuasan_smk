@@ -28,45 +28,24 @@ def init_connection():
 supabase = init_connection()
 
 # ==========================================
-# 🔮 CHEAT CODE: INJEKSI SVG FILTER (KUBE.IO STYLE)
-# ==========================================
-# Kode ini bikin efek refraksi air dan specular highlight asli yang nggak bisa dibikin cuma pake CSS biasa.
-svg_filter = """
-<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
-  <defs>
-    <filter id="liquid-refraction" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" result="noise" />
-      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.15 0" in="noise" result="coloredNoise" />
-      <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale="3" xChannelSelector="R" yChannelSelector="G" result="displaced" />
-      <feMerge>
-        <feMergeNode in="displaced" />
-      </feMerge>
-    </filter>
-  </defs>
-</svg>
-"""
-st.markdown(svg_filter, unsafe_allow_html=True)
-
-# ==========================================
-# 💎 CUSTOM CSS: OBSIDIAN DARK GLASS & HIERARCHY
+# 💎 CUSTOM CSS: PURE SMOOTH DARK GLASS (NO DISTORTION)
 # ==========================================
 glass_css = """
 <style>
 /* 1. Background Dinamis & Reset Font */
 .stApp {
-    /* GANTI URL DI BAWAH DENGAN GAMBAR NEON CYAN-PINK LU */
+    /* GANTI URL DI BAWAH DENGAN GAMBAR BACKGROUND LU */
     background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); 
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    /* Overlay gelap biar warna neon nggak nabrak teks */
     background-color: rgba(5, 5, 10, 0.6); 
     background-blend-mode: overlay;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
 /* ==========================================
-   2. LAYER 1: HEAVY DARK GLASS (WADAH UTAMA)
+   2. WADAH UTAMA: KACA TEBAL HALUS (TANPA SVG NOISE)
    ========================================== */
 [data-testid="stForm"], 
 [data-testid="metric-container"], 
@@ -77,121 +56,108 @@ glass_css = """
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     border-radius: 24px !important; 
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    /* Efek pantulan cahaya di ujung kaca (Bezel Lip tiruan) */
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.03) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5) !important;
     
-    /* BEZEL LIP & CONVEX SHADOW (Cheat Code) */
+    /* Layered Shadow untuk efek Cembung/Volume */
     box-shadow: 
-        0 40px 80px rgba(0, 0, 0, 0.6), /* Bayangan jatuh super jauh */
-        inset 0 2px 3px rgba(255, 255, 255, 0.15), /* Highlight lampu atas */
-        inset 0 -3px 6px rgba(0, 0, 0, 0.8), /* Bayangan tebal bawah (cekung) */
-        inset 0 10px 20px rgba(255, 255, 255, 0.02) !important; /* Glow dalam */
+        0 30px 60px rgba(0, 0, 0, 0.5), /* Bayangan jatuh di background */
+        inset 0 2px 4px rgba(255, 255, 255, 0.1), /* Cahaya dalam (atas) */
+        inset 0 -4px 8px rgba(0, 0, 0, 0.6) !important; /* Kedalaman dalam (bawah) */
         
-    /* Aplikasikan SVG Refraksi */
-    filter: url('#liquid-refraction');
-    
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.6s ease !important;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease !important;
     overflow: hidden;
 }
 
-/* Kapsul Utama Pas Di-Hover (Ngangkat) */
+/* Kapsul Utama Pas Di-Hover */
 [data-testid="stForm"]:hover, 
 [data-testid="stExpander"]:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: 
-        0 50px 90px rgba(0, 0, 0, 0.7), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.25), 
-        inset 0 -3px 6px rgba(0, 0, 0, 0.8),
-        inset 0 10px 20px rgba(255, 255, 255, 0.04) !important;
+        0 40px 80px rgba(0, 0, 0, 0.6), 
+        inset 0 2px 4px rgba(255, 255, 255, 0.15), 
+        inset 0 -4px 8px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* Teks di atas Dark Glass */
 h1, h2, h3, h4, p, label, span, li, div[data-testid="stMarkdownContainer"] {
-    color: rgba(255, 255, 255, 0.9) !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8) !important;
     letter-spacing: 0.3px;
 }
 
 /* ==========================================
-   3. LAYER 2: THIN FROSTED GLASS (ELEMEN DALAM)
+   3. ELEMEN DALAM: SLIDER ALA KUBE.IO (LIQUID GLASS)
    ========================================== */
 
-/* Sliders (Jalur Cekung, Tombol Cembung) */
-[data-testid="stSliderTickBar"] {
-    background: rgba(0, 0, 0, 0.5) !important; /* Track masuk ke dalam */
-    border-radius: 10px !important;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), inset 0 -1px 1px rgba(255,255,255,0.05) !important; 
-}
-div[data-baseweb="slider"] div[role="slider"] {
-    background: rgba(255, 255, 255, 0.85) !important;
-    border: none !important;
-    border-radius: 50% !important;
-    /* Knob nimbul keluar (Cembung) */
+/* 3A. SLIDER TRACK (Jalur Cekung / Parit Kaca) */
+div[data-baseweb="slider"] > div > div {
+    background: rgba(10, 10, 15, 0.5) !important; /* Warna gelap parit */
+    border-radius: 20px !important;
+    border: 1px solid rgba(0, 0, 0, 0.5) !important;
+    
+    /* Trik Concave (Cekung): Bayangan gelap di dalam atas, cahaya tipis di dalam bawah */
     box-shadow: 
-        0 4px 10px rgba(0,0,0,0.5),
-        inset 0 -2px 4px rgba(0,0,0,0.2),
-        inset 0 2px 4px rgba(255,255,255,1) !important;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease !important;
+        inset 0 3px 6px rgba(0, 0, 0, 0.9), 
+        inset 0 -1px 2px rgba(255, 255, 255, 0.15) !important; 
 }
+
+/* 3B. SLIDER KNOB (Tombol Geser Cembung Bening) */
+div[data-baseweb="slider"] div[role="slider"] {
+    height: 24px !important;
+    width: 24px !important;
+    background: rgba(255, 255, 255, 0.15) !important; /* Kaca bening */
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 50% !important;
+    
+    /* Trik Convex / Bezel Lip (Cembung): Terang di atas, Gelap di bawah */
+    box-shadow: 
+        0 4px 10px rgba(0, 0, 0, 0.5), /* Drop shadow (ngambang dari parit) */
+        inset 0 3px 5px rgba(255, 255, 255, 0.9), /* Pantulan cahaya lampu dari atas */
+        inset 0 -3px 5px rgba(0, 0, 0, 0.3) !important; /* Bayangan lengkungan bawah */
+        
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease !important;
+    cursor: grab !important;
+}
+
+/* 3C. Saat Slider Di-Hover (Nangkep Cahaya) */
 div[data-baseweb="slider"] div[role="slider"]:hover {
-    transform: scale(1.3) !important; /* Mantul pas dipegang */
-    background: #ffffff !important;
+    transform: scale(1.2) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 
+        0 6px 15px rgba(0, 0, 0, 0.6), 
+        inset 0 4px 6px rgba(255, 255, 255, 1), 
+        inset 0 -3px 5px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Tombol (Frosted Tipis) */
-div.stButton > button,
-div.stDownloadButton > button {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 12px !important; /* Kotak rounded tipis, bukan pil, biar beda hierarki */
-    color: white !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+/* 3D. Saat Slider Digeser / Ditekan (Tenggelam) */
+div[data-baseweb="slider"] div[role="slider"]:active {
+    transform: scale(0.95) !important; /* Mengkerut dikit ngasih efek fisik berat */
+    cursor: grabbing !important;
+    box-shadow: 
+        0 2px 5px rgba(0, 0, 0, 0.5), 
+        inset 0 2px 4px rgba(255, 255, 255, 0.7), 
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Tombol Primary (Kirim Evaluasi) - Biru Mengkilap */
-[data-testid="baseButton-formSubmit"] {
-    background: linear-gradient(135deg, rgba(0, 242, 254, 0.15) 0%, rgba(79, 172, 254, 0.15) 100%) !important;
-    border: 1px solid rgba(0, 242, 254, 0.3) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 6px 15px rgba(0, 242, 254, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-}
-
-/* Interaksi Tombol Semua Tipe */
-div.stButton > button:hover,
-div.stDownloadButton > button:hover,
-[data-testid="baseButton-formSubmit"]:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    transform: translateY(-2px) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
-}
-div.stButton > button:active,
+/* 3E. Warna Isi Track (Progress Bar Biru Kaca) */
+div[data-baseweb="slider"] > div > div > div {
+    background: linear-gradient(90deg, rgba(0, 242, 254, 0.5), rgba(79, 172, 254, 0.8)) !important;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
+    border-radius: 20px !important;
+}div.stButton > button:active,
 [data-testid="baseButton-formSubmit"]:active {
-    transform: translateY(2px) scale(0.97) !important;
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.4) !important; /* Ditekan tenggelam */
-}
-
-/* Input Teks & Dropdown */
-[data-baseweb="select"] > div, [data-baseweb="input"] > div {
-    background: rgba(0, 0, 0, 0.4) !important; /* Gelap nembus dikit */
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-radius: 12px !important;
-    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.03) !important;
-    transition: all 0.3s ease;
-    color: white !important;
-}
-[data-baseweb="select"] > div:focus-within, [data-baseweb="input"] > div:focus-within {
-    border: 1px solid rgba(0, 242, 254, 0.5) !important; /* Glow cyan pas diketik */
-    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 242, 254, 0.2) !important;
+    transform: translateY(1px) scale(0.98) !important;
 }
 </style>
 """
 st.markdown(glass_css, unsafe_allow_html=True)
+# ==========================================
 # ==========================================
 # (Lanjut ke kode koneksi database lu)# 
 # --- MENU NAVIGASI SIDEBAR ---
