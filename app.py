@@ -189,7 +189,6 @@ div.stDownloadButton > button:hover {
    ========================================== */
 
 header[data-testid="stHeader"] {
-    display: none !important;
     visibility: hidden !important;
     height: 0px !important;
 }
