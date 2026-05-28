@@ -81,153 +81,88 @@ h1, h2, h3, h4, p, label, span, li, div[data-testid="stMarkdownContainer"] {
 }
 
 /* 3. SLIDER & TOGGLE ALA KUBE.IO (LIQUID GLASS) */
-/* Slider Track Cekung */
 div[data-baseweb="slider"] > div > div {
     background: rgba(5, 5, 10, 0.6) !important;
     border-radius: 12px !important;
     border: 1px solid rgba(0, 0, 0, 0.8) !important;
-    box-shadow: 
-        inset 0 3px 8px rgba(0, 0, 0, 0.9), 
-        inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important; 
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important; 
     height: 14px !important;
 }
 
-/* Progress Bar Biru Kaca */
 div[data-baseweb="slider"] > div > div > div {
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(96, 165, 250, 0.9)) !important;
     box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
     border-radius: 12px !important;
 }
 
-/* Slider Knob (Pill-shaped Convex Glass) */
 div[data-baseweb="slider"] div[role="slider"] {
-    height: 32px !important;
-    width: 56px !important; 
+    height: 32px !important; width: 56px !important; 
     background: rgba(255, 255, 255, 0.08) !important; 
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-radius: 16px !important;
-    
-    /* Bezel Lip (Cembung) */
-    box-shadow: 
-        0 8px 16px rgba(0, 0, 0, 0.6), 
-        inset 0 4px 8px rgba(255, 255, 255, 0.7), 
-        inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
-        
-    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease !important;
-    cursor: grab !important;
+    backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important; border-radius: 16px !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), inset 0 4px 8px rgba(255, 255, 255, 0.7), inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
+    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease !important; cursor: grab !important;
 }
 
 div[data-baseweb="slider"] div[role="slider"]:active {
-    transform: scale(0.92) !important; 
-    cursor: grabbing !important;
+    transform: scale(0.92) !important; cursor: grabbing !important;
     background: rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 
-        0 2px 6px rgba(0, 0, 0, 0.6), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.5), 
-        inset 0 -2px 4px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Styling Streamlit Toggle Switch agar seirama dengan liquid glass */
-[data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div {
-    background: rgba(5, 5, 10, 0.6) !important;
-    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important;
-}
-[data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div > div {
-    background: rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
-}
+[data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div { background: rgba(5, 5, 10, 0.6) !important; box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important; }
+[data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div > div { background: rgba(255, 255, 255, 0.8) !important; box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.3) !important; }
 
-/* 4. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
+/* 4. TINTED DARK GLASS */
 .glass-alert {
-    padding: 24px;
-    border-radius: 16px;
-    margin-bottom: 1.5rem;
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    color: rgba(255, 255, 255, 0.95);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+    padding: 24px; border-radius: 16px; margin-bottom: 1.5rem;
+    backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+    color: rgba(255, 255, 255, 0.95); transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.6); border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
-
 .glass-green { background: rgba(16, 185, 129, 0.12); border-top: 1px solid rgba(16, 185, 129, 0.3); border-left: 1px solid rgba(16, 185, 129, 0.1); }
 .glass-blue { background: rgba(59, 130, 246, 0.12); border-top: 1px solid rgba(59, 130, 246, 0.3); border-left: 1px solid rgba(59, 130, 246, 0.1); }
 .glass-orange { background: rgba(245, 158, 11, 0.12); border-top: 1px solid rgba(245, 158, 11, 0.3); border-left: 1px solid rgba(245, 158, 11, 0.1); }
 .glass-red { background: rgba(239, 68, 68, 0.12); border-top: 1px solid rgba(239, 68, 68, 0.3); border-left: 1px solid rgba(239, 68, 68, 0.1); }
 
 /* Tombol Form */
-div.stButton > button,
-div.stDownloadButton > button {
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 12px !important;
-    color: white !important;
-    font-weight: 500 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.3s ease !important;
+div.stButton > button, div.stDownloadButton > button {
+    background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important; border-radius: 12px !important;
+    color: white !important; font-weight: 500 !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important; transition: all 0.3s ease !important;
 }
-div.stButton > button:hover,
-div.stDownloadButton > button:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-}
-[data-testid="baseButton-formSubmit"] {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%) !important;
-    border: 1px solid rgba(96, 165, 250, 0.4) !important;
-    border-radius: 12px !important;
-}
-[data-testid="baseButton-formSubmit"]:hover {
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
-}
+div.stButton > button:hover, div.stDownloadButton > button:hover { background: rgba(255, 255, 255, 0.1) !important; border-color: rgba(255, 255, 255, 0.3) !important; }
+[data-testid="baseButton-formSubmit"] { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%) !important; border: 1px solid rgba(96, 165, 250, 0.4) !important; border-radius: 12px !important; }
+[data-testid="baseButton-formSubmit"]:hover { border-color: rgba(255, 255, 255, 0.4) !important; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important; }
 
-/* ==========================================
-   FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
-   ========================================== */
-
-/* 2. Sembunyikan Footer Streamlit */
-footer {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-/* 3. Pangkas Ruang Kosong (Padding) Bawaan di Atas dan Bawah */
-.block-container {
-    padding-top: 2rem !important; 
-    padding-bottom: 1rem !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-}
-
-/* 4. Fix Khusus Mobile (iOS/Safari Background Bug) */
-.stApp {
-    min-height: -webkit-fill-available !important; 
-}
+/* FIX FULLSCREEN & MOBILE */
+footer { display: none !important; visibility: hidden !important; }
+.block-container { padding-top: 2rem !important; padding-bottom: 1rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+.stApp { min-height: -webkit-fill-available !important; }
 
 /* ==========================================
    5. PRINT MODE (HTML TO PDF OPTIMIZATION)
    ========================================== */
 @media print {
-    /* Paksa browser mencetak semua warna background dan efek */
-    html, body, .stApp, div {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
+    html, body, .stApp, div { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     
-    /* Sembunyikan elemen yang tidak perlu ikut di-print (seperti sidebar dan header) */
+    /* SEMBUNYIKAN ELEMEN YANG TIDAK PERLU DI-PRINT */
     [data-testid="stSidebar"], 
     header[data-testid="stHeader"], 
-    footer {
+    footer,
+    .no-print, /* Kelas custom untuk area tombol dan header download */
+    [data-testid="stDownloadButton"], /* Tombol Download CSV bawaan Streamlit */
+    iframe[title="streamlit_components.v1.components.html"] { /* Iframe tombol JS */
         display: none !important;
+        height: 0 !important;
     }
 
-    /* Hilangkan background image bawaan saat print agar lebih bersih (opsional) */
-    .stApp {
-        background-image: none !important;
-        background-color: #0b0b10 !important; /* Warna gelap solid */
+    .stApp { background-image: none !important; background-color: #0b0b10 !important; }
+    
+    /* Cegah grafik terpotong separuh saat ganti halaman PDF */
+    .js-plotly-plot, .plotly, [data-testid="stPlotlyChart"] {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 }
 </style>
@@ -459,22 +394,17 @@ elif menu == "Dashboard Analisis (Admin)":
             tampilkan_3d = True 
             
         else:
-            # Mesin otomatis mencari jumlah komponen untuk mencapai variansi minimal 72%
             pca = PCA(n_components=0.72) 
             pca_data = pca.fit_transform(scaled_data)
             variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
             jumlah_dimensi_baru = pca.n_components_
             
-            # --- FIX INDEX ERROR ---
             df['PC1'] = pca_data[:, 0]
             
-            # Cek apakah PCA menghasilkan lebih dari 1 dimensi
             if jumlah_dimensi_baru > 1:
                 df['PC2'] = pca_data[:, 1]
             else:
-                # Jika cuma 1 dimensi, berikan nilai 0 agar grafik scatter 2D tidak crash
                 df['PC2'] = 0 
-            # -----------------------
             
             st.sidebar.success(f"Mode Akademis Aktif.\nDimensi: {jumlah_dimensi_baru}\nVariansi: {variansi_terjelaskan:.2f}%")
             st.sidebar.caption("Grafik 3D dinonaktifkan.")
@@ -571,7 +501,19 @@ elif menu == "Dashboard Analisis (Admin)":
                         hover_data=['Nama', 'Kelas', 'Jurusan'], title=f"Visualisasi 3D ({len(df_filtered)} Siswa)",
                         labels={'color': 'Klaster'}
                     )
-                    fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
+                    # Modifikasi Kamera agar otomatis ter-zoom out dan utuh di PDF
+                    fig_3d.update_layout(
+                        scene_camera=dict(
+                            up=dict(x=0, y=0, z=1),
+                            center=dict(x=0, y=0, z=0),
+                            eye=dict(x=1.5, y=1.5, z=1.2)
+                        ),
+                        margin=dict(l=0, r=0, b=0, t=40),
+                        paper_bgcolor='rgba(0,0,0,0)', 
+                        plot_bgcolor='rgba(0,0,0,0)', 
+                        height=600, 
+                        font_color='white'
+                    )
                     st.plotly_chart(fig_3d, use_container_width=True)
                 else:
                     st.info(f"Algoritma beroperasi di ruang {pca.n_components_} dimensi. Ditampilkan sebagai Proyeksi 2D Utama.")
@@ -597,12 +539,15 @@ elif menu == "Dashboard Analisis (Admin)":
                     color_discrete_sequence=['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
                 )
                 
-                # Implementasi Rounded Corners Penuh dengan base=0.05
                 fig_bar.update_traces(marker_cornerradius=12, marker_line_width=0, base=0.05)
                 fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 st.plotly_chart(fig_bar, use_container_width=True)
 
                 st.subheader("Bedah Investigasi per Klaster")
+                
+                # Fitur Toggle Baru untuk membuka Data Target saat PDF
+                tampilkan_nama = st.toggle("📋 Tampilkan Daftar Nama Target Investigasi secara Terbuka (Untuk Laporan PDF)", value=False)
+                
                 for cluster in profile.index:
                     dim_otomatis = profile.loc[cluster].idxmin()
                     
@@ -655,50 +600,56 @@ elif menu == "Dashboard Analisis (Admin)":
                         <b>Target Investigasi:</b> Fokus pada <b>Kelas {kelas_terbanyak}</b> ({jml_kelas} anak) dan <b>Jurusan {jurusan_terbanyak}</b> ({jml_jurusan} anak).
                         """
                         st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
-                        with st.expander(f"Daftar Nama Target Investigasi (Klaster {cluster} - Kasus: {dim_pilihan})"):
-                            df_kelas = df_cluster[df_cluster['Kelas'] == kelas_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
-                            df_kelas.index += 1 
+                        
+                        df_kelas = df_cluster[df_cluster['Kelas'] == kelas_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
+                        df_kelas.index += 1 
+                        df_jurusan = df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
+                        df_jurusan.index += 1 
+                        
+                        # Logika Toggle untuk Daftar Target
+                        if tampilkan_nama:
                             st.markdown(f"**Target Kelas {kelas_terbanyak}:**")
                             st.dataframe(df_kelas, use_container_width=True)
                             st.markdown("---")
-                            df_jurusan = df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
-                            df_jurusan.index += 1 
                             st.markdown(f"**Target Jurusan {jurusan_terbanyak}:**")
                             st.dataframe(df_jurusan, use_container_width=True)
+                        else:
+                            with st.expander(f"Daftar Nama Target Investigasi (Klaster {cluster} - Kasus: {dim_pilihan})"):
+                                st.markdown(f"**Target Kelas {kelas_terbanyak}:**")
+                                st.dataframe(df_kelas, use_container_width=True)
+                                st.markdown("---")
+                                st.markdown(f"**Target Jurusan {jurusan_terbanyak}:**")
+                                st.dataframe(df_jurusan, use_container_width=True)
 
-                st.markdown("---")
-                st.subheader("📥 Cetak Laporan Operasional (PDF)")
-                st.info("💡 Klik tombol di bawah ini. Pastikan untuk mencentang opsi **'Background graphics' (Grafik Latar Belakang)** di pengaturan jendela *Print* agar tampilan kaca (Glass UI) tetap terlihat.")
+                # ==========================================
+                # AREA MENU CETAK (Disembunyikan saat di-Print)
+                # ==========================================
+                st.markdown("""
+                <div class="no-print">
+                    <hr>
+                    <h3 style="color:white; margin-bottom:10px;">📥 Menu Cetak & Download</h3>
+                    <p style="background: rgba(59, 130, 246, 0.15); padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        💡 <b>Panduan Cetak PDF:</b> Klik tombol Cetak di bawah. Pada jendela *Print* browser, pastikan kamu mencentang opsi <b>'Background graphics' (Grafik Latar Belakang)</b> agar efek kaca tetap terbawa.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
                 
-                # HTML Button Injection untuk trigger Print Browser
+                # HTML Button Print
                 html_btn_1 = """
                 <style>
                 .print-btn {
                     background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%);
-                    border: 1px solid rgba(96, 165, 250, 0.4);
-                    border-radius: 12px;
-                    color: white;
-                    padding: 12px 20px;
-                    font-size: 15px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    width: 100%;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    font-weight: 500;
+                    border: 1px solid rgba(96, 165, 250, 0.4); border-radius: 12px; color: white;
+                    padding: 12px 20px; font-size: 15px; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+                    cursor: pointer; transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); font-weight: 500;
                 }
-                .print-btn:hover {
-                    border-color: rgba(255, 255, 255, 0.6);
-                    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-                    transform: translateY(-2px);
-                }
+                .print-btn:hover { border-color: rgba(255, 255, 255, 0.6); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
                 </style>
                 <button class="print-btn" onclick="window.parent.print()">🖨️ Cetak Dashboard / Save as PDF</button>
                 """
                 components.html(html_btn_1, height=60)
 
-                st.markdown("---")
-                st.subheader("Download Database Mentah")
+                st.markdown('<div class="no-print"><br><h4 style="color:white; margin-bottom:10px;">💾 Download Database Mentah</h4></div>', unsafe_allow_html=True)
                 csv = df_filtered.to_csv(index=False).encode('utf-8')
                 st.download_button("Download Database Lengkap (.csv)", csv, "Database_Kepuasan.csv", "text/csv")
 
@@ -721,16 +672,13 @@ elif menu == "Dashboard Analisis (Admin)":
                     
                     fig_radar.update_traces(fill='toself', line_color='cyan', fillcolor='rgba(0, 242, 254, 0.2)')
                     fig_radar.update_layout(
-                        height=400,
-                        margin=dict(l=40, r=40, t=40, b=40),
+                        height=400, margin=dict(l=40, r=40, t=40, b=40),
                         polar=dict(
                             bgcolor='rgba(15, 15, 20, 0.6)',
                             radialaxis=dict(visible=True, gridcolor='rgba(255,255,255,0.1)', color='rgba(255,255,255,0.4)'),
                             angularaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='rgba(255,255,255,0.8)')
                         ),
-                        paper_bgcolor='rgba(0,0,0,0)', 
-                        plot_bgcolor='rgba(0,0,0,0)', 
-                        font_color='white'
+                        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white'
                     )
                     st.plotly_chart(fig_radar, use_container_width=True)
 
@@ -739,17 +687,13 @@ elif menu == "Dashboard Analisis (Admin)":
                     df_kritis = df_filtered[df_filtered['Cluster'] == klaster_terburuk]
                     st.subheader(f"Proporsi Jurusan Kritis (Klaster {klaster_terburuk})")
                     
-                    # Implementasi warna gelap mewah (Deep Jewel Tones)
                     dark_colors = ['#1e3a8a', '#5b21b6', '#0f766e', '#991b1b', '#9a3412']
                     
                     fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.5, color_discrete_sequence=dark_colors)
                     fig_donut.update_traces(marker=dict(line=dict(color='rgba(18, 18, 24, 1)', width=3)))
                     fig_donut.update_layout(
-                        height=400,
-                        margin=dict(l=20, r=20, t=40, b=20),
-                        paper_bgcolor='rgba(0,0,0,0)', 
-                        plot_bgcolor='rgba(0,0,0,0)', 
-                        font_color='white'
+                        height=400, margin=dict(l=20, r=20, t=40, b=20),
+                        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white'
                     )
                     st.plotly_chart(fig_donut, use_container_width=True)
 
@@ -781,32 +725,25 @@ elif menu == "Dashboard Analisis (Admin)":
 
                     st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
 
-                st.markdown("---")
-                st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
-                st.info("💡 Klik tombol di bawah ini untuk mencetak halaman Laporan Eksekutif ini menjadi PDF.")
+                st.markdown("""
+                <div class="no-print">
+                    <hr>
+                    <h3 style="color:white; margin-bottom:10px;">📥 Cetak Laporan Eksekutif (PDF)</h3>
+                    <p style="background: rgba(16, 185, 129, 0.15); padding: 12px; border-radius: 8px; border-left: 4px solid #10b981;">
+                        💡 Klik tombol di bawah ini untuk mencetak dan menyimpan halaman Laporan Eksekutif ini menjadi PDF.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
                 
-                # HTML Button Injection untuk trigger Print Browser
                 html_btn_2 = """
                 <style>
                 .print-btn {
                     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.2) 100%);
-                    border: 1px solid rgba(52, 211, 153, 0.4);
-                    border-radius: 12px;
-                    color: white;
-                    padding: 12px 20px;
-                    font-size: 15px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    width: 100%;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    font-weight: 500;
+                    border: 1px solid rgba(52, 211, 153, 0.4); border-radius: 12px; color: white;
+                    padding: 12px 20px; font-size: 15px; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+                    cursor: pointer; transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); font-weight: 500;
                 }
-                .print-btn:hover {
-                    border-color: rgba(255, 255, 255, 0.6);
-                    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-                    transform: translateY(-2px);
-                }
+                .print-btn:hover { border-color: rgba(255, 255, 255, 0.6); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
                 </style>
                 <button class="print-btn" onclick="window.parent.print()">📄 Simpan Halaman Eksekutif ke PDF</button>
                 """
