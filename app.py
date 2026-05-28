@@ -188,13 +188,6 @@ div.stDownloadButton > button:hover {
    FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
    ========================================== */
 
-/* 1. Sembunyikan Header Bawaan Streamlit (Bar "Fork", GitHub, Menu) */
-header[data-testid="stHeader"] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0px !important;
-}
-
 /* 2. Sembunyikan Footer Streamlit */
 footer {
     display: none !important;
