@@ -544,8 +544,9 @@ elif menu == "Dashboard Analisis (Admin)":
                     barmode='group', labels={'value': 'Skor (1-5)', 'variable': 'Dimensi', 'Label_Klaster': 'Kelompok'},
                     color_discrete_sequence=['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
                 )
-                # Implementasi Rounded Corners untuk Bar Chart
-                fig_bar.update_traces(marker_cornerradius=8, marker_line_width=0)
+                
+                # Implementasi Rounded Corners Penuh dengan base=0.05
+                fig_bar.update_traces(marker_cornerradius=12, marker_line_width=0, base=0.05)
                 fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 st.plotly_chart(fig_bar, use_container_width=True)
 
@@ -706,9 +707,10 @@ elif menu == "Dashboard Analisis (Admin)":
                     df_radar = pd.DataFrame(dict(Skor=list(rata_global.values()), Dimensi=list(rata_global.keys())))
                     fig_radar = px.line_polar(df_radar, r='Skor', theta='Dimensi', line_close=True, range_r=[0,5], markers=True)
                     
-                    # Implementasi Dark Glass pada Radar Chart
                     fig_radar.update_traces(fill='toself', line_color='cyan', fillcolor='rgba(0, 242, 254, 0.2)')
                     fig_radar.update_layout(
+                        height=400,
+                        margin=dict(l=40, r=40, t=40, b=40),
                         polar=dict(
                             bgcolor='rgba(15, 15, 20, 0.6)',
                             radialaxis=dict(visible=True, gridcolor='rgba(255,255,255,0.1)', color='rgba(255,255,255,0.4)'),
@@ -725,10 +727,18 @@ elif menu == "Dashboard Analisis (Admin)":
                     df_kritis = df_filtered[df_filtered['Cluster'] == klaster_terburuk]
                     st.subheader(f"Proporsi Jurusan Kritis (Klaster {klaster_terburuk})")
                     
-                    fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.5)
-                    # Efek pecahan kaca dengan memberi border tebal warna gelap (sama dengan background)
+                    # Implementasi warna gelap mewah (Deep Jewel Tones)
+                    dark_colors = ['#1e3a8a', '#5b21b6', '#0f766e', '#991b1b', '#9a3412']
+                    
+                    fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.5, color_discrete_sequence=dark_colors)
                     fig_donut.update_traces(marker=dict(line=dict(color='rgba(18, 18, 24, 1)', width=3)))
-                    fig_donut.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
+                    fig_donut.update_layout(
+                        height=400,
+                        margin=dict(l=20, r=20, t=40, b=20),
+                        paper_bgcolor='rgba(0,0,0,0)', 
+                        plot_bgcolor='rgba(0,0,0,0)', 
+                        font_color='white'
+                    )
                     st.plotly_chart(fig_donut, use_container_width=True)
 
                 st.divider()
