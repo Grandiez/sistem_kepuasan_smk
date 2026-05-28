@@ -14,7 +14,7 @@ from supabase import create_client, Client
 st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide", initial_sidebar_state="expanded")
 
 # ==========================================
-# 🔌 KONEKSI DATABASE SUPABASE
+# KONEKSI DATABASE SUPABASE
 # ==========================================
 @st.cache_resource
 def init_connection():
@@ -28,225 +28,165 @@ def init_connection():
 supabase = init_connection()
 
 # ==========================================
-# 💎 CUSTOM CSS: PURE SMOOTH DARK GLASS & TINTED ALERTS
+# CUSTOM CSS: LIQUID GLASS & ELEGANT UI
 # ==========================================
 glass_css = """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
 /* 1. Background Dinamis & Reset Font */
 .stApp {
-    /* GANTI URL DI BAWAH DENGAN GAMBAR BACKGROUND LU */
     background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); 
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    background-color: rgba(5, 5, 10, 0.6); 
+    background-color: rgba(10, 10, 15, 0.7); 
     background-blend-mode: overlay;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* ==========================================
-   2. WADAH UTAMA: KACA TEBAL HALUS (TANPA SVG NOISE)
-   ========================================== */
+/* 2. WADAH UTAMA: KACA TEBAL HALUS */
 [data-testid="stForm"], 
 [data-testid="metric-container"], 
 [data-testid="stExpander"],
 [data-testid="stSidebar"],
 [data-testid="stFileUploadDropzone"] {
-    background: rgba(18, 18, 24, 0.45) !important; /* Obsidian Dark Tint */
+    background: rgba(18, 18, 24, 0.45) !important; 
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border-radius: 24px !important; 
-    /* Efek pantulan cahaya di ujung kaca (Bezel Lip tiruan) */
-    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.03) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.5) !important;
-    
-    /* Layered Shadow untuk efek Cembung/Volume */
+    border-radius: 20px !important; 
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.02) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.6) !important;
     box-shadow: 
-        0 30px 60px rgba(0, 0, 0, 0.5), /* Bayangan jatuh di background */
-        inset 0 2px 4px rgba(255, 255, 255, 0.1), /* Cahaya dalam (atas) */
-        inset 0 -4px 8px rgba(0, 0, 0, 0.6) !important; /* Kedalaman dalam (bawah) */
-        
+        0 30px 60px rgba(0, 0, 0, 0.5), 
+        inset 0 2px 4px rgba(255, 255, 255, 0.05), 
+        inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease !important;
-    overflow: hidden;
 }
 
-/* Kapsul Utama Pas Di-Hover */
 [data-testid="stForm"]:hover, 
 [data-testid="stExpander"]:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     box-shadow: 
         0 40px 80px rgba(0, 0, 0, 0.6), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.15), 
-        inset 0 -4px 8px rgba(0, 0, 0, 0.7) !important;
+        inset 0 2px 4px rgba(255, 255, 255, 0.1), 
+        inset 0 -4px 8px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Teks di atas Dark Glass */
 h1, h2, h3, h4, p, label, span, li, div[data-testid="stMarkdownContainer"] {
-    color: rgba(255, 255, 255, 0.95) !important;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8) !important;
-    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+    letter-spacing: 0.2px;
 }
 
-/* ==========================================
-   3. ELEMEN DALAM: SLIDER ALA KUBE.IO (LIQUID GLASS)
-   ========================================== */
-
-/* 3A. SLIDER TRACK (Jalur Cekung / Parit Kaca) */
+/* 3. SLIDER & TOGGLE ALA KUBE.IO (LIQUID GLASS) */
+/* Slider Track Cekung */
 div[data-baseweb="slider"] > div > div {
-    background: rgba(10, 10, 15, 0.5) !important; /* Warna gelap parit */
-    border-radius: 20px !important;
-    border: 1px solid rgba(0, 0, 0, 0.5) !important;
-    
-    /* Trik Concave (Cekung): Bayangan gelap di dalam atas, cahaya tipis di dalam bawah */
+    background: rgba(5, 5, 10, 0.6) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.8) !important;
     box-shadow: 
-        inset 0 3px 6px rgba(0, 0, 0, 0.9), 
-        inset 0 -1px 2px rgba(255, 255, 255, 0.15) !important; 
+        inset 0 3px 8px rgba(0, 0, 0, 0.9), 
+        inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important; 
+    height: 14px !important;
 }
 
-/* 3B. SLIDER KNOB (Tombol Geser Cembung Bening) */
+/* Progress Bar Biru Kaca */
+div[data-baseweb="slider"] > div > div > div {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(96, 165, 250, 0.9)) !important;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
+    border-radius: 12px !important;
+}
+
+/* Slider Knob (Pill-shaped Convex Glass) */
 div[data-baseweb="slider"] div[role="slider"] {
-    height: 24px !important;
-    width: 24px !important;
-    background: rgba(255, 255, 255, 0.15) !important; /* Kaca bening */
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 50% !important;
+    height: 32px !important;
+    width: 56px !important; 
+    background: rgba(255, 255, 255, 0.08) !important; 
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 16px !important;
     
-    /* Trik Convex / Bezel Lip (Cembung): Terang di atas, Gelap di bawah */
+    /* Bezel Lip (Cembung) */
     box-shadow: 
-        0 4px 10px rgba(0, 0, 0, 0.5), /* Drop shadow (ngambang dari parit) */
-        inset 0 3px 5px rgba(255, 255, 255, 0.9), /* Pantulan cahaya lampu dari atas */
-        inset 0 -3px 5px rgba(0, 0, 0, 0.3) !important; /* Bayangan lengkungan bawah */
+        0 8px 16px rgba(0, 0, 0, 0.6), 
+        inset 0 4px 8px rgba(255, 255, 255, 0.7), 
+        inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
         
-    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease !important;
+    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease !important;
     cursor: grab !important;
 }
 
-/* 3C. Saat Slider Di-Hover (Nangkep Cahaya) */
-div[data-baseweb="slider"] div[role="slider"]:hover {
-    transform: scale(1.2) !important;
-    background: rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 
-        0 6px 15px rgba(0, 0, 0, 0.6), 
-        inset 0 4px 6px rgba(255, 255, 255, 1), 
-        inset 0 -3px 5px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* 3D. Saat Slider Digeser / Ditekan (Tenggelam) */
 div[data-baseweb="slider"] div[role="slider"]:active {
-    transform: scale(0.95) !important; /* Mengkerut dikit ngasih efek fisik berat */
+    transform: scale(0.92) !important; 
     cursor: grabbing !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     box-shadow: 
-        0 2px 5px rgba(0, 0, 0, 0.5), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.7), 
-        inset 0 -2px 4px rgba(0, 0, 0, 0.2) !important;
+        0 2px 6px rgba(0, 0, 0, 0.6), 
+        inset 0 2px 4px rgba(255, 255, 255, 0.5), 
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* 3E. Warna Isi Track (Progress Bar Biru Kaca) */
-div[data-baseweb="slider"] > div > div > div {
-    background: linear-gradient(90deg, rgba(0, 242, 254, 0.5), rgba(79, 172, 254, 0.8)) !important;
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
-    border-radius: 20px !important;
+/* Styling Streamlit Toggle Switch agar seirama dengan liquid glass */
+[data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div {
+    background: rgba(5, 5, 10, 0.6) !important;
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important;
+}
+[data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div > div {
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
 }
 
-/* ==========================================
-   4. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER)
-   ========================================== */
+/* 4. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
 .glass-alert {
-    padding: 20px;
-    border-radius: 18px;
-    margin-bottom: 1.2rem;
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
     color: rgba(255, 255, 255, 0.95);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    
-    /* Bayangan jatuh (ngambang) dan efek kedalaman dasar */
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.4),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
     border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
-.glass-alert:hover {
-    transform: translateY(-2px);
-}
 
-/* Varian Kaca Hijau (Puas/Sangat Memuaskan) */
-.glass-green {
-    background: rgba(16, 185, 129, 0.15); 
-    border-top: 1px solid rgba(16, 185, 129, 0.4);
-    border-left: 1px solid rgba(16, 185, 129, 0.2);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(16, 185, 129, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
-}
+.glass-green { background: rgba(16, 185, 129, 0.12); border-top: 1px solid rgba(16, 185, 129, 0.3); border-left: 1px solid rgba(16, 185, 129, 0.1); }
+.glass-blue { background: rgba(59, 130, 246, 0.12); border-top: 1px solid rgba(59, 130, 246, 0.3); border-left: 1px solid rgba(59, 130, 246, 0.1); }
+.glass-orange { background: rgba(245, 158, 11, 0.12); border-top: 1px solid rgba(245, 158, 11, 0.3); border-left: 1px solid rgba(245, 158, 11, 0.1); }
+.glass-red { background: rgba(239, 68, 68, 0.12); border-top: 1px solid rgba(239, 68, 68, 0.3); border-left: 1px solid rgba(239, 68, 68, 0.1); }
 
-/* Varian Kaca Biru (Cukup Memuaskan) */
-.glass-blue {
-    background: rgba(59, 130, 246, 0.15); 
-    border-top: 1px solid rgba(59, 130, 246, 0.4);
-    border-left: 1px solid rgba(59, 130, 246, 0.2);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(59, 130, 246, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
-}
-
-/* Varian Kaca Oranye (Perlu Perbaikan) */
-.glass-orange {
-    background: rgba(245, 158, 11, 0.15); 
-    border-top: 1px solid rgba(245, 158, 11, 0.4);
-    border-left: 1px solid rgba(245, 158, 11, 0.2);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(245, 158, 11, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
-}
-
-/* Varian Kaca Merah (Kritis) */
-.glass-red {
-    background: rgba(239, 68, 68, 0.15); 
-    border-top: 1px solid rgba(239, 68, 68, 0.4);
-    border-left: 1px solid rgba(239, 68, 68, 0.2);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(239, 68, 68, 0.15), inset 0 -3px 6px rgba(0, 0, 0, 0.6);
-}
-
-/* Style Tombol Form Biar Smooth */
+/* Tombol Form */
 div.stButton > button,
 div.stDownloadButton > button {
     background: rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 12px !important;
     color: white !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
     transition: all 0.3s ease !important;
 }
 div.stButton > button:hover,
 div.stDownloadButton > button:hover {
     background: rgba(255, 255, 255, 0.1) !important;
-    transform: translateY(-2px) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-}
-div.stButton > button:active {
-    transform: translateY(1px) scale(0.98) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
 }
 [data-testid="baseButton-formSubmit"] {
-    background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.2) 100%) !important;
-    border: 1px solid rgba(0, 242, 254, 0.4) !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%) !important;
+    border: 1px solid rgba(96, 165, 250, 0.4) !important;
     border-radius: 12px !important;
-    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2) !important;
-    transition: all 0.3s ease !important;
 }
 [data-testid="baseButton-formSubmit"]:hover {
-    transform: translateY(-2px) !important;
     border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 8px 20px rgba(0, 242, 254, 0.4) !important;
-}
-[data-testid="baseButton-formSubmit"]:active {
-    transform: translateY(1px) scale(0.98) !important;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
 }
 </style>
 """
 st.markdown(glass_css, unsafe_allow_html=True)
-# ==========================================
 
 # --- MENU NAVIGASI SIDEBAR ---
 st.sidebar.title("Navigasi Sistem")
@@ -258,16 +198,14 @@ st.sidebar.markdown("---")
 # ==========================================
 if menu == "Isi Kuesioner (Siswa)":
     
-    # Inisialisasi Session State
     if 'sudah_login' not in st.session_state:
         st.session_state['sudah_login'] = False
     if 'data_diri' not in st.session_state:
         st.session_state['data_diri'] = {}
 
-    # --- TAMPILAN A: BELUM LOGIN ---
     if not st.session_state['sudah_login']:
-        st.title("🔐 Registrasi Responden")
-        st.markdown("Silakan lengkapi data diri kamu sebelum mengisi kuesioner evaluasi.")
+        st.title("Registrasi Responden")
+        st.markdown("Silakan lengkapi data diri Anda sebelum mengisi kuesioner evaluasi.")
 
         with st.form(key='login_form'):
             st.subheader("Data Diri Siswa")
@@ -280,11 +218,11 @@ if menu == "Isi Kuesioner (Siswa)":
                 jurusan = st.selectbox("Jurusan", ["TKJT", "Busana", "DKV", "TO", "ATU"])
             
             jenis_kelamin = st.radio("Jenis Kelamin", ["Laki-laki", "Perempuan"], horizontal=True)
-            submit_login = st.form_submit_button(label='Mulai Kuesioner 🚀')
+            submit_login = st.form_submit_button(label='Mulai Kuesioner')
 
         if submit_login:
             if nama_siswa.strip() == "":
-                st.error("⚠️ Nama lengkap wajib diisi!")
+                st.error("Nama lengkap wajib diisi.")
             else:
                 st.session_state['data_diri'] = {
                     "Nama": nama_siswa, "Kelas": kelas,
@@ -293,10 +231,9 @@ if menu == "Isi Kuesioner (Siswa)":
                 st.session_state['sudah_login'] = True
                 st.rerun()
 
-    # --- TAMPILAN B: SUDAH LOGIN (ISI KUESIONER) ---
     else:
-        st.title(f"👋 Halo, {st.session_state['data_diri']['Nama']}!")
-        st.markdown("Silakan isi kuesioner layanan SMKN 1 Dawuan secara objektif. Skala **1 (Sangat Tidak Puas)** hingga **5 (Sangat Puas)**.")
+        st.title(f"Halo, {st.session_state['data_diri']['Nama']}")
+        st.markdown("Silakan isi kuesioner layanan secara objektif. Skala 1 (Sangat Tidak Puas) hingga 5 (Sangat Puas).")
 
         with st.form(key='kuesioner_form'):
             st.subheader("1. Fasilitas Sekolah")
@@ -311,7 +248,7 @@ if menu == "Isi Kuesioner (Siswa)":
             p6 = st.slider("Kesesuaian materi dengan kebutuhan industri/dunia kerja (P6)", 1, 5, 3)
             p7 = st.slider("Tingkat kemudahan dalam memahami materi yang diajarkan (P7)", 1, 5, 3)
             p8 = st.slider("Kesesuaian kurikulum dengan minat dan bakat siswa (P8)", 1, 5, 3)
-            p9 = st.slider("Variasi metode pembelajaran yang digunakan (tidak membosankan) (P9)", 1, 5, 3)
+            p9 = st.slider("Variasi metode pembelajaran yang digunakan (P9)", 1, 5, 3)
             p10 = st.slider("Manfaat materi pelajaran untuk masa depan karir (P10)", 1, 5, 3)
             st.divider()
 
@@ -348,14 +285,13 @@ if menu == "Isi Kuesioner (Siswa)":
             if supabase:
                 try:
                     supabase.table("kuesioner").insert(data_responden).execute()
-                    st.success("Terima kasih! Data evaluasi berhasil disimpan ke Database Utama.")
-                    st.balloons()
+                    st.success("Terima kasih. Data evaluasi berhasil disimpan.")
                 except Exception as e:
                     st.error(f"Gagal menyimpan ke database: {e}")
             else:
-                st.warning("Koneksi Supabase belum diatur di Streamlit Secrets! Data tidak tersimpan permanen.")
+                st.warning("Koneksi Supabase belum diatur. Data tidak tersimpan permanen.")
 
-        if st.button("🔄 Isi Kuesioner Baru (Reset)"):
+        if st.button("Isi Kuesioner Baru"):
             st.session_state['sudah_login'] = False
             st.session_state['data_diri'] = {}
             st.rerun()
@@ -365,13 +301,12 @@ if menu == "Isi Kuesioner (Siswa)":
 # ==========================================
 elif menu == "Dashboard Analisis (Admin)":
     
-    # --- SISTEM LOGIN ADMIN ---
     if 'admin_logged_in' not in st.session_state:
         st.session_state['admin_logged_in'] = False
 
     if not st.session_state['admin_logged_in']:
-        st.title("🔒 Akses Terbatas Manajemen")
-        st.markdown("Silakan masukkan **Username** dan **Password** untuk mengakses Dashboard.")
+        st.title("Akses Terbatas Manajemen")
+        st.markdown("Silakan masukkan Username dan Password untuk mengakses Dashboard.")
 
         col_space1, col_login, col_space2 = st.columns([1, 2, 1])
         with col_login:
@@ -386,49 +321,46 @@ elif menu == "Dashboard Analisis (Admin)":
                     st.session_state['admin_logged_in'] = True
                     st.rerun()
                 else:
-                    st.error("⚠️ Username atau Password salah!")
+                    st.error("Username atau Password salah.")
         
-        # Mencegah sisa kode di bawah tereksekusi jika belum login
         st.stop() 
 
-    # --- JIKA SUDAH LOGIN, JALANKAN DASHBOARD ---
     st.sidebar.markdown("---")
-    if st.sidebar.button("🚪 Logout Admin", use_container_width=True):
+    if st.sidebar.button("Logout Admin", use_container_width=True):
         st.session_state['admin_logged_in'] = False
         st.rerun()
     st.sidebar.markdown("---")
 
-    st.title("📊 Analisis Kepuasan Siswa - SMK N 1 Dawuan")
-    st.markdown("Sistem Analisis Kepuasan Siswa Berbasis **Machine Learning (PCA & K-Means Clustering)**.")
+    st.title("Analisis Kepuasan Siswa")
+    st.markdown("Sistem Analisis Kepuasan Siswa Berbasis Machine Learning (PCA & K-Means Clustering).")
 
-    # --- MANAJEMEN SUMBER DATA ---
     st.sidebar.header("1. Sumber Data")
     sumber_data = st.sidebar.radio("Pilih metode pengambilan data:", ["Tarik dari Database (Otomatis)", "Upload Manual (Excel/CSV)"])
 
-    df = None # Inisialisasi DataFrame kosong
+    df = None 
 
     if sumber_data == "Tarik dari Database (Otomatis)":
-        if st.sidebar.button("🔄 Tarik Data Kuesioner Sekarang", use_container_width=True):
+        if st.sidebar.button("Tarik Data Kuesioner Sekarang", use_container_width=True):
             with st.spinner("Mengambil data dari server..."):
                 if supabase:
                     response = supabase.table("kuesioner").select("*").execute()
                     df_raw = pd.DataFrame(response.data)
                     if not df_raw.empty:
                         st.session_state['df_raw'] = df_raw
-                        st.sidebar.success(f"Berhasil menarik {len(df_raw)} data!")
+                        st.sidebar.success(f"Berhasil menarik {len(df_raw)} data.")
                     else:
-                        st.sidebar.warning("Database masih kosong (Belum ada siswa yang mengisi).")
+                        st.sidebar.warning("Database masih kosong.")
                 else:
-                    st.sidebar.error("Koneksi Database Supabase Belum Diatur!")
+                    st.sidebar.error("Koneksi Database Supabase Belum Diatur.")
         
         if 'df_raw' in st.session_state and not st.session_state['df_raw'].empty:
             df = st.session_state['df_raw'].copy()
-            st.info(f"✅ Menggunakan {len(df)} data kuesioner dari database realtime.")
+            st.info(f"Menggunakan {len(df)} data kuesioner dari database realtime.")
         else:
             st.info("Silakan klik 'Tarik Data Kuesioner Sekarang' di sidebar.")
 
     else:
-        uploaded_file = st.sidebar.file_uploader("Unggah file Excel/CSV dari Google Forms", type=["csv", "xlsx"])
+        uploaded_file = st.sidebar.file_uploader("Unggah file Excel/CSV", type=["csv", "xlsx"])
         if uploaded_file is not None:
             try:
                 if uploaded_file.name.endswith('.csv'):
@@ -442,14 +374,13 @@ elif menu == "Dashboard Analisis (Admin)":
                     df = df.iloc[:, :25]
                     df.columns = nama_kolom_baru
                 else:
-                    st.error("Format file tidak sesuai! Pastikan ada kolom Timestamp, Nama, Kelas, Jurusan, JK, dan 20 Pertanyaan.")
+                    st.error("Format file tidak sesuai.")
                     df = None
                     
             except Exception as e:
                 st.error(f"Terjadi kesalahan saat membaca file: {e}")
                 df = None
 
-    # --- JIKA DATA (df) SUDAH ADA, JALANKAN PCA & K-MEANS ---
     if df is not None:
         kolom_nilai = [f'P{i}' for i in range(1, 21)]
         jml_awal = len(df)
@@ -457,15 +388,12 @@ elif menu == "Dashboard Analisis (Admin)":
         jml_akhir = len(df)
         
         if jml_awal != jml_akhir:
-            st.sidebar.warning(f"⚠️ Ditemukan {jml_awal - jml_akhir} data kuesioner tidak lengkap. Otomatis diabaikan.")
+            st.sidebar.warning(f"Ditemukan {jml_awal - jml_akhir} data tidak lengkap. Diabaikan.")
 
         data_numeric = df[kolom_nilai]
         scaler = StandardScaler()
         scaled_data = scaler.fit_transform(data_numeric)
 
-        # ==========================================
-        # 🧠 LOGIKA SWITCH PCA (VISUALISASI VS AKADEMIS)
-        # ==========================================
         st.sidebar.header("2. Mode Konfigurasi PCA")
         mode_pca = st.sidebar.radio(
             "Pilih Target Reduksi Dimensi:",
@@ -481,52 +409,43 @@ elif menu == "Dashboard Analisis (Admin)":
             df['PC2'] = pca_data[:, 1]
             df['PC3'] = pca_data[:, 2]
             
-            st.sidebar.info(f"👁️ Mode Visual Aktif.\nTotal Variansi: **{variansi_terjelaskan:.2f}%**")
+            st.sidebar.info(f"Mode Visual Aktif.\nTotal Variansi: {variansi_terjelaskan:.2f}%")
             tampilkan_3d = True 
             
         else:
-            # Mesin otomatis mencari jumlah komponen untuk mencapai variansi minimal 72%
             pca = PCA(n_components=0.72) 
             pca_data = pca.fit_transform(scaled_data)
             variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
             jumlah_dimensi_baru = pca.n_components_
             
-            # Ekstrak setidaknya 2 komponen pertama untuk Proyeksi Scatter 2D
             df['PC1'] = pca_data[:, 0]
             df['PC2'] = pca_data[:, 1]
             
-            st.sidebar.success(f"🎓 Mode Akademis Aktif.\nDimensi Terbentuk: **{jumlah_dimensi_baru} Komponen**\nTotal Variansi: **{variansi_terjelaskan:.2f}%**")
-            st.sidebar.caption("⚠️ Grafik 3D dinonaktifkan karena dimensi ruang K-Means melebihi 3.")
+            st.sidebar.success(f"Mode Akademis Aktif.\nDimensi: {jumlah_dimensi_baru}\nVariansi: {variansi_terjelaskan:.2f}%")
+            st.sidebar.caption("Grafik 3D dinonaktifkan.")
             tampilkan_3d = False 
 
-        # --- K-MEANS CLUSTERING ---
         st.sidebar.header("3. Konfigurasi Klastering")
-        gunakan_pca = st.sidebar.toggle("🟢 Aktifkan Reduksi PCA", value=True)
+        gunakan_pca = st.sidebar.toggle("Aktifkan Reduksi PCA", value=True)
         data_untuk_kmeans = pca_data if gunakan_pca else scaled_data 
 
         n_clusters = st.sidebar.slider("Jumlah Klaster (K)", 2, 5, 3)
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
 
-        # ======== BAGIAN YANG DIUPDATE ========
         if n_clusters >= 2:
             skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
             st.sidebar.markdown("---")
-            st.sidebar.subheader("🔬 Validasi K-Means")
-            
-            # Menampilkan score menggunakan komponen Metric agar glowing
+            st.sidebar.subheader("Validasi K-Means")
             st.sidebar.metric(label=f"Silhouette Score (K={n_clusters})", value=f"{skor_siluet:.3f}")
             
-            # Memberikan indikasi dinamis
             if skor_siluet >= 0.5:
-                st.sidebar.success("✅ Struktur klaster sangat baik dan terpisah jelas.")
+                st.sidebar.success("Struktur klaster sangat baik.")
             elif skor_siluet >= 0.25:
-                st.sidebar.info("🔵 Struktur klaster cukup baik.")
+                st.sidebar.info("Struktur klaster cukup baik.")
             else:
-                st.sidebar.warning("⚠️ Batas antar klaster kurang tegas (overlapping).")
-        # ======================================
+                st.sidebar.warning("Batas antar klaster kurang tegas.")
 
-        # --- FILTER DATA ---
         st.sidebar.header("4. Filter Data")
         list_jurusan = df['Jurusan'].unique().tolist()
         pilih_jurusan = st.sidebar.multiselect("Jurusan:", list_jurusan, default=list_jurusan)
@@ -542,7 +461,7 @@ elif menu == "Dashboard Analisis (Admin)":
         ].copy()
 
         if df_filtered.empty:
-            st.warning("⚠️ Data tidak ditemukan dengan kombinasi filter tersebut.")
+            st.warning("Data tidak ditemukan dengan kombinasi filter tersebut.")
         else:
             df_filtered['Fasilitas'] = df_filtered[[f'P{i}' for i in range(1, 6)]].mean(axis=1)
             df_filtered['Kurikulum'] = df_filtered[[f'P{i}' for i in range(6, 11)]].mean(axis=1)
@@ -553,29 +472,29 @@ elif menu == "Dashboard Analisis (Admin)":
             counts = df_filtered['Cluster'].value_counts().sort_index()
 
             kamus_masalah = {
-                'P1': 'Fasilitas pendukung dirasa kurang lengkap', 'P2': 'Peralatan belajar banyak rusak/kuno',
-                'P3': 'Area sekolah dirasa kurang aman/nyaman', 'P4': 'Lokasi fasilitas (kantin/toilet) sulit dijangkau',
+                'P1': 'Fasilitas pendukung dirasa kurang lengkap', 'P2': 'Peralatan belajar banyak rusak',
+                'P3': 'Area sekolah dirasa kurang aman', 'P4': 'Lokasi fasilitas sulit dijangkau',
                 'P5': 'Fasilitas belum maksimal membantu belajar', 'P6': 'Materi kurang relevan dengan industri',
-                'P7': 'Siswa kesulitan memahami materi', 'P8': 'Kurikulum belum sesuai minat dan bakat',
-                'P9': 'Metode pembelajaran membosankan', 'P10': 'Materi dirasa kurang bermanfaat bagi masa depan',
-                'P11': 'Guru kurang menguasai materi mendalam', 'P12': 'Penjelasan guru berbelit-belit',
-                'P13': 'Guru kurang memberi teladan etika/disiplin', 'P14': 'Guru sulit dihubungi saat siswa kesulitan',
-                'P15': 'Guru sering terlambat/jam kosong', 'P16': 'Kebersihan lingkungan sekolah kurang terjaga',
+                'P7': 'Siswa kesulitan memahami materi', 'P8': 'Kurikulum belum sesuai minat',
+                'P9': 'Metode pembelajaran membosankan', 'P10': 'Materi dirasa kurang bermanfaat',
+                'P11': 'Guru kurang menguasai materi', 'P12': 'Penjelasan guru kurang jelas',
+                'P13': 'Guru kurang memberi teladan', 'P14': 'Guru sulit dihubungi saat kesulitan',
+                'P15': 'Guru sering terlambat mengajar', 'P16': 'Kebersihan lingkungan kurang terjaga',
                 'P17': 'Lingkungan sekolah rawan gangguan', 'P18': 'Suasana kelas kurang kondusif',
-                'P19': 'Hubungan sosial warga sekolah kurang harmonis', 'P20': 'Budaya sopan santun belum maksimal'
+                'P19': 'Hubungan sosial kurang harmonis', 'P20': 'Budaya sopan santun belum maksimal'
             }
 
             kamus_solusi = {
-                'P1': 'Inventarisasi lab dan ajukan pengadaan alat.', 'P2': 'Maintenance rutin dan perbarui teknologi.',
-                'P3': 'Tingkatkan keamanan dan patroli sekolah.', 'P4': 'Perbaiki layout dan tambah fasilitas toilet/kantin.',
-                'P5': 'Evaluasi penggunaan lab agar efektif.', 'P6': 'Undang praktisi industri dan sinkronisasi kurikulum.',
-                'P7': 'Adakan tutor sebaya dan sederhanakan modul.', 'P8': 'Perkuat program konseling karir dari guru BK.',
-                'P9': 'Training guru untuk metode belajar interaktif.', 'P10': 'Adakan seminar prospek karir/kunjungan industri.',
-                'P11': 'Ikutkan guru dalam diklat/magang industri.', 'P12': 'Evaluasi cara mengajar dan kumpulkan feedback.',
-                'P13': 'Tegakkan kode etik dan beri penghargaan guru teladan.', 'P14': 'Wajibkan jam konsultasi siswa di luar kelas.',
-                'P15': 'Terapkan presensi ketat dan sanksi keterlambatan.', 'P16': 'Galakkan program kebersihan dan evaluasi OB.',
-                'P17': 'Tindak tegas pelanggaran/bullying.', 'P18': 'Perbaiki fasilitas kelas & tegakkan tatib.',
-                'P19': 'Adakan kegiatan kebersamaan lintas kelas.', 'P20': 'Kampanyekan budaya 5S secara masif.'
+                'P1': 'Inventarisasi lab dan ajukan pengadaan alat.', 'P2': 'Maintenance rutin peralatan.',
+                'P3': 'Tingkatkan keamanan sekolah.', 'P4': 'Perbaiki layout fasilitas publik.',
+                'P5': 'Evaluasi penggunaan lab.', 'P6': 'Undang praktisi dan sinkronisasi kurikulum.',
+                'P7': 'Sederhanakan modul pembelajaran.', 'P8': 'Perkuat program konseling.',
+                'P9': 'Pelatihan guru untuk metode interaktif.', 'P10': 'Seminar prospek karir.',
+                'P11': 'Sertakan guru dalam magang industri.', 'P12': 'Kumpulkan feedback metode mengajar.',
+                'P13': 'Tegakkan kode etik pengajar.', 'P14': 'Sediakan jam konsultasi siswa.',
+                'P15': 'Terapkan presensi ketat bagi pengajar.', 'P16': 'Galakkan program kebersihan.',
+                'P17': 'Tindak tegas pelanggaran ketertiban.', 'P18': 'Perbaiki fasilitas kelas.',
+                'P19': 'Adakan kegiatan kebersamaan.', 'P20': 'Kampanyekan budaya 5S.'
             }
 
             dimensi_map = {
@@ -586,18 +505,14 @@ elif menu == "Dashboard Analisis (Admin)":
             jml_pria = len(df_filtered[df_filtered['Jenis_Kelamin'].str.contains('Pria|Laki', case=False, na=False)])
             jml_wanita = len(df_filtered) - jml_pria
             
-            tab1, tab2 = st.tabs(["📊 Dashboard Analisis", "📑 Laporan Eksekutif"])
+            tab1, tab2 = st.tabs(["Dashboard Analisis", "Laporan Eksekutif"])
 
-            # ==========================================
-            # TAB 1: DASHBOARD ANALISIS 
-            # ==========================================
             with tab1:
-                st.subheader("👥 Statistik Responden")
+                st.subheader("Statistik Responden")
                 cols = st.columns(len(df_filtered['Cluster'].unique()))
                 for i, (cls, count) in enumerate(counts.items()):
                     cols[i].metric(f"Klaster {cls}", f"{count} Siswa")
 
-                # Menerapkan logika kondisional untuk plot 3D dan 2D
                 if tampilkan_3d:
                     fig_3d = px.scatter_3d(
                         df_filtered, x='PC1', y='PC2', z='PC3', color=df_filtered['Cluster'].astype(str),
@@ -607,22 +522,20 @@ elif menu == "Dashboard Analisis (Admin)":
                     fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
                     st.plotly_chart(fig_3d, use_container_width=True)
                 else:
-                    st.info(f"🌌 Algoritma saat ini beroperasi di ruang **{pca.n_components_} dimensi** untuk mengamankan **{variansi_terjelaskan:.2f}%** informasi asli. Tampilan spasial dikonversi menjadi Proyeksi 2D Utama.")
+                    st.info(f"Algoritma beroperasi di ruang {pca.n_components_} dimensi. Ditampilkan sebagai Proyeksi 2D Utama.")
                     
-                    # --- PENGGANTI: PROYEKSI 2D SCATTER PLOT ---
-                    st.markdown("**📉 Proyeksi 2D (Komponen Utama 1 vs Komponen Utama 2)**")
+                    st.markdown("**Proyeksi 2D (Komponen Utama 1 vs Komponen Utama 2)**")
                     fig_2d = px.scatter(
                         df_filtered, x='PC1', y='PC2', color=df_filtered['Cluster'].astype(str),
                         hover_data=['Nama', 'Kelas', 'Jurusan'], 
                         labels={'color': 'Klaster'},
-                        title="Bayangan Klaster di Dimensi Terbesar (PC1 & PC2)"
+                        title="Sebaran Klaster (PC1 vs PC2)"
                     )
                     fig_2d.update_traces(marker=dict(size=8, line=dict(width=1, color='DarkSlateGrey')))
                     fig_2d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                     st.plotly_chart(fig_2d, use_container_width=True)
-                    st.caption("💡 *Grafik di atas adalah proyeksi (bayangan) 2D dari algoritma multi-dimensi. Posisi titik mewakili sebaran siswa secara garis besar.*")
 
-                st.subheader("📈 Perbandingan Skor Rata-rata per Klaster")
+                st.subheader("Perbandingan Skor Rata-rata per Klaster")
                 profile_reset = profile.reset_index()
                 profile_reset['Label_Klaster'] = profile_reset['Cluster'].apply(lambda x: f"Klaster {x}<br>({counts[x]} Siswa)")
                 
@@ -631,15 +544,17 @@ elif menu == "Dashboard Analisis (Admin)":
                     barmode='group', labels={'value': 'Skor (1-5)', 'variable': 'Dimensi', 'Label_Klaster': 'Kelompok'},
                     color_discrete_sequence=['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
                 )
+                # Implementasi Rounded Corners untuk Bar Chart
+                fig_bar.update_traces(marker_cornerradius=8, marker_line_width=0)
                 fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 st.plotly_chart(fig_bar, use_container_width=True)
 
-                st.subheader("🔍 Bedah Investigasi per Klaster")
+                st.subheader("Bedah Investigasi per Klaster")
                 for cluster in profile.index:
                     dim_otomatis = profile.loc[cluster].idxmin()
                     
                     dim_pilihan = st.selectbox(
-                        f"🔎 Pilih Dimensi untuk dibedah pada Klaster {cluster}:",
+                        f"Pilih Dimensi untuk dibedah pada Klaster {cluster}:",
                         options=['Fasilitas', 'Kurikulum', 'Guru', 'Lingkungan'],
                         index=['Fasilitas', 'Kurikulum', 'Guru', 'Lingkungan'].index(dim_otomatis),
                         key=f"select_dim_{cluster}" 
@@ -661,48 +576,46 @@ elif menu == "Dashboard Analisis (Admin)":
                     jurusan_terbanyak = df_cluster['Jurusan'].mode()[0] if not df_cluster.empty else "N/A"
                     jml_jurusan = len(df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak])
 
-                    # ========================================================
-                    # LOGIKA HTML TINTED GLASS UNTUK TAB 1
-                    # ========================================================
                     if skor_item >= 4.0:
-                        status, glass_color = "Sangat Memuaskan 🌟", "glass-green"
+                        status, glass_color = "Sangat Memuaskan", "glass-green"
                     elif skor_item >= 3.0:
-                        status, glass_color = "Cukup Memuaskan 🔵", "glass-blue"
+                        status, glass_color = "Cukup Memuaskan", "glass-blue"
                     elif skor_item >= 2.0:
-                        status, glass_color = "Perlu Perbaikan 🟠", "glass-orange"
+                        status, glass_color = "Perlu Perbaikan", "glass-orange"
                     else:
-                        status, glass_color = "Kritis (Perbaikan Segera!) 🔴", "glass-red"
+                        status, glass_color = "Kritis", "glass-red"
 
                     if skor_item >= 4.0:
                         pesan_html = f"""
                         <b>Klaster {cluster} (Dimensi: {dim_pilihan} - Status: {status})</b><br><br>
-                        ✨ <b>Kondisi Aman:</b> Secara umum siswa di klaster ini sudah PUAS dengan <b>{dim_pilihan}</b>. Aspek terendah ada pada poin <i>'{isi_masalah}'</i> namun skornya masih sangat aman di angka <b>{skor_item:.2f}/5.00</b>.<br><br>
-                        📈 <b>Saran:</b> Pertahankan kinerja. Preventif: {solusi_masalah}
+                        <b>Kondisi Aman:</b> Mayoritas siswa di klaster ini merasa puas dengan <b>{dim_pilihan}</b>. Aspek terendah ada pada poin <i>'{isi_masalah}'</i> namun skor masih aman di angka <b>{skor_item:.2f}/5.00</b>.<br><br>
+                        <b>Saran:</b> {solusi_masalah}
                         """
                         st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
-                        with st.expander(f"📋 Lihat Daftar Mayoritas Siswa (Klaster {cluster})"):
-                            st.write(f"Siswa di klaster ini tidak memerlukan investigasi mendalam untuk masalah {dim_pilihan}.")
+                        with st.expander(f"Daftar Mayoritas Siswa (Klaster {cluster})"):
+                            st.write(f"Tidak memerlukan investigasi mendalam untuk masalah {dim_pilihan}.")
                     else:
                         pesan_html = f"""
                         <b>Klaster {cluster} (Dimensi: {dim_pilihan} - Status: {status})</b><br><br>
-                        👉 <b>Akar Masalah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item:.2f}/5.00</b>).<br><br>
-                        🛠️ <b>Rekomendasi Solusi:</b> {solusi_masalah}<br><br>
-                        🎯 <b>Target Investigasi:</b> Fokus pada <b>Kelas {kelas_terbanyak}</b> ({jml_kelas} anak) dan <b>Jurusan {jurusan_terbanyak}</b> ({jml_jurusan} anak).
+                        <b>Akar Masalah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item:.2f}/5.00</b>).<br><br>
+                        <b>Rekomendasi Solusi:</b> {solusi_masalah}<br><br>
+                        <b>Target Investigasi:</b> Fokus pada <b>Kelas {kelas_terbanyak}</b> ({jml_kelas} anak) dan <b>Jurusan {jurusan_terbanyak}</b> ({jml_jurusan} anak).
                         """
                         st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
-                        with st.expander(f"📋 Klik untuk Daftar Nama Target Investigasi (Klaster {cluster} - Kasus: {dim_pilihan})"):
+                        with st.expander(f"Daftar Nama Target Investigasi (Klaster {cluster} - Kasus: {dim_pilihan})"):
                             df_kelas = df_cluster[df_cluster['Kelas'] == kelas_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
                             df_kelas.index += 1 
-                            st.markdown(f"**🎯 1. Target Kelas {kelas_terbanyak}:**")
+                            st.markdown(f"**Target Kelas {kelas_terbanyak}:**")
                             st.dataframe(df_kelas, use_container_width=True)
                             st.markdown("---")
                             df_jurusan = df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak][['Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin']].reset_index(drop=True)
                             df_jurusan.index += 1 
-                            st.markdown(f"**🎯 2. Target Jurusan {jurusan_terbanyak}:**")
+                            st.markdown(f"**Target Jurusan {jurusan_terbanyak}:**")
                             st.dataframe(df_jurusan, use_container_width=True)
 
                 st.markdown("---")
-                st.subheader("📥 Cetak Laporan Operasional (PDF)")
+                st.subheader("Cetak Laporan Operasional (PDF)")
+                
                 def buat_pdf_dashboard():
                     fig_bar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
                     fig_bar.write_image("temp_bar.png", engine="kaleido", width=1000, height=450)
@@ -713,7 +626,7 @@ elif menu == "Dashboard Analisis (Admin)":
                     pdf.set_font("Arial", 'B', 16)
                     pdf.cell(0, 8, txt="LAPORAN OPERASIONAL KLASTER SISWA", ln=True, align='C')
                     pdf.set_font("Arial", '', 11)
-                    pdf.cell(0, 6, txt=f"SMK N 1 DAWUAN | Dicetak melalui Sistem Analisis Kepuasan", ln=True, align='C')
+                    pdf.cell(0, 6, txt=f"Dicetak melalui Sistem Analisis Kepuasan", ln=True, align='C')
                     pdf.line(10, 25, 200, 25) 
                     pdf.ln(10)
                     
@@ -763,30 +676,27 @@ elif menu == "Dashboard Analisis (Admin)":
                     fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                     return pdf_bytes_dash
 
-                if st.button("📊 Proses PDF Operasional"):
-                    with st.spinner("Menyiapkan dokumen elegan..."):
+                if st.button("Proses PDF Operasional"):
+                    with st.spinner("Menyiapkan dokumen..."):
                         st.session_state['pdf_dash_ready'] = buat_pdf_dashboard()
-                        st.success("PDF siap diunduh!")
+                        st.success("PDF siap diunduh.")
 
                 if 'pdf_dash_ready' in st.session_state:
-                    st.download_button(label="⬇️ Download PDF Operasional", data=st.session_state['pdf_dash_ready'], file_name="Laporan_Operasional_Klaster.pdf", mime="application/pdf")
+                    st.download_button(label="Download PDF Operasional", data=st.session_state['pdf_dash_ready'], file_name="Laporan_Operasional_Klaster.pdf", mime="application/pdf")
 
                 st.markdown("---")
-                st.subheader("💾 Download Database Mentah")
+                st.subheader("Download Database Mentah")
                 csv = df_filtered.to_csv(index=False).encode('utf-8')
-                st.download_button("📥 Download Database Lengkap (.csv)", csv, "Database_Kepuasan_SMK.csv", "text/csv")
+                st.download_button("Download Database Lengkap (.csv)", csv, "Database_Kepuasan.csv", "text/csv")
 
-            # ==========================================
-            # TAB 2: LAPORAN EKSEKUTIF 
-            # ==========================================
             with tab2:
-                st.header("📑 Executive Summary")
-                st.markdown(f"Laporan ini merangkum hasil analisis kepuasan dari **{len(df_filtered)} responden**.")
+                st.header("Executive Summary")
+                st.markdown(f"Laporan merangkum hasil analisis kepuasan dari **{len(df_filtered)} responden**.")
 
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    st.subheader("🕸️ Radar Chart Kinerja Global")
+                    st.subheader("Radar Chart Kinerja Global")
                     rata_global = {
                         'Fasilitas': df_filtered['Fasilitas'].mean(),
                         'Kurikulum': df_filtered['Kurikulum'].mean(),
@@ -795,24 +705,35 @@ elif menu == "Dashboard Analisis (Admin)":
                     }
                     df_radar = pd.DataFrame(dict(Skor=list(rata_global.values()), Dimensi=list(rata_global.keys())))
                     fig_radar = px.line_polar(df_radar, r='Skor', theta='Dimensi', line_close=True, range_r=[0,5], markers=True)
-                    fig_radar.update_traces(fill='toself', line_color='cyan')
                     
-                    fig_radar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
+                    # Implementasi Dark Glass pada Radar Chart
+                    fig_radar.update_traces(fill='toself', line_color='cyan', fillcolor='rgba(0, 242, 254, 0.2)')
+                    fig_radar.update_layout(
+                        polar=dict(
+                            bgcolor='rgba(15, 15, 20, 0.6)',
+                            radialaxis=dict(visible=True, gridcolor='rgba(255,255,255,0.1)', color='rgba(255,255,255,0.4)'),
+                            angularaxis=dict(gridcolor='rgba(255,255,255,0.1)', color='rgba(255,255,255,0.8)')
+                        ),
+                        paper_bgcolor='rgba(0,0,0,0)', 
+                        plot_bgcolor='rgba(0,0,0,0)', 
+                        font_color='white'
+                    )
                     st.plotly_chart(fig_radar, use_container_width=True)
 
                 with col2:
                     klaster_terburuk = profile.mean(axis=1).idxmin()
                     df_kritis = df_filtered[df_filtered['Cluster'] == klaster_terburuk]
-                    st.subheader(f"🍩 Proporsi Jurusan Kritis (Klaster {klaster_terburuk})")
+                    st.subheader(f"Proporsi Jurusan Kritis (Klaster {klaster_terburuk})")
                     
-                    fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.4)
-                    
+                    fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.5)
+                    # Efek pecahan kaca dengan memberi border tebal warna gelap (sama dengan background)
+                    fig_donut.update_traces(marker=dict(line=dict(color='rgba(18, 18, 24, 1)', width=3)))
                     fig_donut.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                     st.plotly_chart(fig_donut, use_container_width=True)
 
                 st.divider()
 
-                st.subheader("📋 Rapor Evaluasi 4 Dimensi Layanan")
+                st.subheader("Rapor Evaluasi 4 Dimensi Layanan")
                 rata_global_series = pd.Series(rata_global).sort_values() 
 
                 for dimensi, skor_dimensi in rata_global_series.items():
@@ -823,31 +744,31 @@ elif menu == "Dashboard Analisis (Admin)":
 
                     isi_masalah, solusi_masalah = kamus_masalah[item_terendah], kamus_solusi[item_terendah]
 
-                    # ========================================================
-                    # LOGIKA HTML TINTED GLASS UNTUK TAB 2
-                    # ========================================================
                     if skor_dimensi >= 4.0:
-                        status, glass_color = "Sangat Memuaskan 🌟", "glass-green"
-                        pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br>💡 <b>Saran Preventif:</b> Perhatikan poin <i>'{isi_masalah}'</i> (Skor: {skor_item_terendah:.2f}). <b>Tindakan:</b> {solusi_masalah}"
+                        status, glass_color = "Sangat Memuaskan", "glass-green"
+                        pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br><b>Saran Preventif:</b> Perhatikan poin <i>'{isi_masalah}'</i> (Skor: {skor_item_terendah:.2f}). <b>Tindakan:</b> {solusi_masalah}"
                     else:
                         if skor_dimensi >= 3.0: 
-                            status, glass_color = "Cukup Memuaskan 🔵", "glass-blue"
+                            status, glass_color = "Cukup Memuaskan", "glass-blue"
                         elif skor_dimensi >= 2.0: 
-                            status, glass_color = "Perlu Perbaikan 🟠", "glass-orange"
+                            status, glass_color = "Perlu Perbaikan", "glass-orange"
                         else: 
-                            status, glass_color = "Kritis (Perbaikan Segera!) 🔴", "glass-red"
+                            status, glass_color = "Kritis", "glass-red"
                             
-                        pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br>🚨 <b>Titik Terlemah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item_terendah:.2f}</b>).<br><br>🛠️ <b>Tindakan:</b> {solusi_masalah}"
+                        pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br><b>Titik Terlemah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item_terendah:.2f}</b>).<br><br><b>Tindakan:</b> {solusi_masalah}"
 
                     st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
 
                 st.markdown("---")
-                st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
+                st.subheader("Cetak Laporan Eksekutif (PDF)")
+                
                 def buat_pdf():
-                    fig_radar.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
+                    fig_radar.update_layout(template="plotly_white", polar=dict(bgcolor='white'), paper_bgcolor="white", plot_bgcolor="white", font_color="black")
+                    fig_radar.update_traces(line_color='blue', fillcolor='rgba(0, 0, 255, 0.1)')
                     fig_radar.write_image("temp_radar.png", engine="kaleido", width=600, height=400)
                     
                     fig_donut.update_layout(template="plotly_white", paper_bgcolor="white", plot_bgcolor="white", font_color="black")
+                    fig_donut.update_traces(marker=dict(line=dict(color='white', width=2)))
                     fig_donut.write_image("temp_donut.png", engine="kaleido", width=500, height=400)
                     
                     pdf = FPDF()
@@ -855,20 +776,18 @@ elif menu == "Dashboard Analisis (Admin)":
                     
                     pdf.set_font("Arial", 'B', 18)
                     pdf.cell(0, 10, txt="EXECUTIVE SUMMARY: KEPUASAN SISWA", ln=True, align='C')
-                    pdf.set_font("Arial", 'B', 14)
-                    pdf.cell(0, 8, txt="SMK NEGERI 1 DAWUAN", ln=True, align='C')
-                    pdf.line(10, 30, 200, 30)
+                    pdf.line(10, 25, 200, 25)
                     pdf.ln(5)
                     
                     pdf.set_font("Arial", '', 11)
-                    teks_demo = f"Laporan ini merupakan hasil komputasi algoritma Machine Learning terhadap {len(df_filtered)} siswa."
+                    teks_demo = f"Laporan ini merupakan hasil komputasi data terhadap {len(df_filtered)} siswa."
                     pdf.multi_cell(0, 6, txt=teks_demo)
                     pdf.ln(5)
                     
                     pdf.set_font("Arial", 'B', 12)
                     pdf.cell(0, 8, txt="A. Pemetaan Kinerja & Profiling Kritis:", ln=True)
-                    pdf.image("temp_radar.png", x=10, y=55, w=100)
-                    pdf.image("temp_donut.png", x=110, y=55, w=90)
+                    pdf.image("temp_radar.png", x=10, y=50, w=100)
+                    pdf.image("temp_donut.png", x=110, y=50, w=90)
                     pdf.ln(70) 
                     
                     pdf.set_font("Arial", 'B', 12)
@@ -906,9 +825,9 @@ elif menu == "Dashboard Analisis (Admin)":
                             pdf.set_font("Arial", 'B', 11)
                             pdf.cell(0, 7, txt=f">> Masalah Utama pada {dimensi}:", ln=True)
                             pdf.set_font("Arial", '', 10)
-                            pdf.multi_cell(0, 5, txt=f"Keluhan Siswa: {teks_masalah}")
+                            pdf.multi_cell(0, 5, txt=f"Keluhan: {teks_masalah}")
                             pdf.ln(2)
-                            pdf.multi_cell(0, 5, txt=f"Saran Tindakan: {teks_solusi}")
+                            pdf.multi_cell(0, 5, txt=f"Tindakan: {teks_solusi}")
                             pdf.ln(3)
 
                     pdf.output("temp_laporan.pdf")
@@ -916,14 +835,17 @@ elif menu == "Dashboard Analisis (Admin)":
                     for file in ["temp_radar.png", "temp_donut.png", "temp_laporan.pdf"]:
                         if os.path.exists(file): os.remove(file)
                     
-                    fig_radar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
+                    # Kembalikan warna dark theme untuk display
+                    fig_radar.update_traces(line_color='cyan', fillcolor='rgba(0, 242, 254, 0.2)')
+                    fig_radar.update_layout(polar=dict(bgcolor='rgba(15, 15, 20, 0.6)'), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
+                    fig_donut.update_traces(marker=dict(line=dict(color='rgba(18, 18, 24, 1)', width=3)))
                     fig_donut.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                     return pdf_bytes
 
-                if st.button("📄 Proses PDF Eksekutif"):
+                if st.button("Proses PDF Eksekutif"):
                     with st.spinner("Meracik laporan eksekutif lengkap..."):
                         st.session_state['pdf_ready'] = buat_pdf()
-                        st.success("PDF Eksekutif berhasil dibuat!")
+                        st.success("PDF Eksekutif berhasil dibuat.")
 
                 if 'pdf_ready' in st.session_state:
-                    st.download_button(label="⬇️ Download Laporan Kepsek (PDF)", data=st.session_state['pdf_ready'], file_name="Laporan_Manajerial_SMK.pdf", mime="application/pdf")
+                    st.download_button(label="Download Laporan Manajerial (PDF)", data=st.session_state['pdf_ready'], file_name="Laporan_Manajerial.pdf", mime="application/pdf")
