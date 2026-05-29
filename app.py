@@ -489,6 +489,20 @@ elif menu == "Dashboard Analisis (Admin)":
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
 
+        # =====================================================================
+        # KODE TAMBAHAN UNTUK MENAMPILKAN TITIK CENTROID DI SIDEBAR BUAT EXCEL
+        # =====================================================================
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("📍 Centroid Akhir (Buat Excel)")
+        centroid_df = pd.DataFrame(
+            kmeans.cluster_centers_, 
+            columns=[f'PC{i+1}' for i in range(kmeans.cluster_centers_.shape[1])]
+        )
+        centroid_df.index.name = 'Klaster'
+        st.sidebar.dataframe(centroid_df)
+        st.sidebar.caption("Ganti nilai C1, C2, C3 di Excel Tahap 5 dengan angka pada tabel ini biar hasilnya klop.")
+        # =====================================================================
+
         if n_clusters >= 2:
             skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
             st.sidebar.markdown("---")
