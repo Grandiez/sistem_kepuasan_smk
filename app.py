@@ -508,7 +508,7 @@ elif menu == "Dashboard Analisis (Admin)":
         # =====================================================================
         st.sidebar.markdown("---")
         st.sidebar.subheader("📋 Koordinat Siswa (Buat Excel)")
-        st.sidebar.dataframe(df_filtered[['Nama', 'PC1', 'PC2', 'PC3']])
+        st.sidebar.dataframe(df[['Nama', 'PC1', 'PC2', 'PC3']])
         st.sidebar.caption("Copy data PC1, PC2, PC3 ini buat gantiin tabel titik siswa manual lu di Excel.")
         # =====================================================================
         
