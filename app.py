@@ -499,12 +499,15 @@ elif menu == "Dashboard Analisis (Admin)":
                 columns=[f'PC{i+1}' for i in range(kmeans.cluster_centers_.shape[1])]
             )
             centroid_df.index.name = 'Klaster'
-            # Dikonversi jadi TSV (Tab Separated) supaya Excel otomatis ngebaca per kolom
-            st.sidebar.code(centroid_df.to_csv(sep='\t'), language='text')
+            
+            # Tambahin parameter decimal=',' biar titik otomatis jadi koma dari sistem
+            st.sidebar.code(centroid_df.to_csv(sep='\t', decimal=','), language='text')
 
             st.sidebar.markdown("---")
             st.sidebar.subheader("📋 Koordinat Siswa")
-            st.sidebar.code(df[['Nama', 'PC1', 'PC2', 'PC3']].to_csv(index=False, sep='\t'), language='text')
+            
+            # Tambahin parameter decimal=',' juga di sini
+            st.sidebar.code(df[['Nama', 'PC1', 'PC2', 'PC3']].to_csv(index=False, sep='\t', decimal=','), language='text')
             
             st.sidebar.caption("Matikan toggle 'Mode Bantuan Excel' jika sudah selesai agar menu kembali rapi.")
         # =====================================================================
