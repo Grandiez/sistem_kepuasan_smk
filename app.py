@@ -460,22 +460,17 @@ elif menu == "Dashboard Analisis (Admin)":
             tampilkan_3d = True 
             
         else:
-            # Mesin otomatis mencari jumlah komponen untuk mencapai variansi minimal 72%
             pca = PCA(n_components=0.72) 
             pca_data = pca.fit_transform(scaled_data)
             variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
             jumlah_dimensi_baru = pca.n_components_
             
-            # --- FIX INDEX ERROR ---
             df['PC1'] = pca_data[:, 0]
             
-            # Cek apakah PCA menghasilkan lebih dari 1 dimensi
             if jumlah_dimensi_baru > 1:
                 df['PC2'] = pca_data[:, 1]
             else:
-                # Jika cuma 1 dimensi, berikan nilai 0 agar grafik scatter 2D tidak crash
                 df['PC2'] = 0 
-            # -----------------------
             
             st.sidebar.success(f"Mode Akademis Aktif.\nDimensi: {jumlah_dimensi_baru}\nVariansi: {variansi_terjelaskan:.2f}%")
             st.sidebar.caption("Grafik 3D dinonaktifkan.")
@@ -490,26 +485,28 @@ elif menu == "Dashboard Analisis (Admin)":
         df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
 
         # =====================================================================
-        # KODE TAMBAHAN UNTUK MENAMPILKAN TITIK CENTROID DI SIDEBAR BUAT EXCEL
+        # MENU BANTUAN HITUNGAN MANUAL EXCEL DENGAN FITUR TOGGLE & AUTO-COPY
         # =====================================================================
         st.sidebar.markdown("---")
-        st.sidebar.subheader("📍 Centroid Akhir (Buat Excel)")
-        centroid_df = pd.DataFrame(
-            kmeans.cluster_centers_, 
-            columns=[f'PC{i+1}' for i in range(kmeans.cluster_centers_.shape[1])]
-        )
-        centroid_df.index.name = 'Klaster'
-        st.sidebar.dataframe(centroid_df)
-        st.sidebar.caption("Ganti nilai C1, C2, C3 di Excel Tahap 5 dengan angka pada tabel ini biar hasilnya klop.")
-        # =====================================================================
+        tampilkan_excel = st.sidebar.toggle("🛠️ Mode Bantuan Excel")
+        
+        if tampilkan_excel:
+            st.sidebar.success("💡 **Info Copy:** Klik tombol copy di sudut kanan atas tiap kotak kode di bawah, lalu langsung paste (CTRL+V) ke cell Excel. Data akan otomatis masuk ke dalam kolom!")
+            
+            st.sidebar.subheader("📍 Centroid Akhir")
+            centroid_df = pd.DataFrame(
+                kmeans.cluster_centers_, 
+                columns=[f'PC{i+1}' for i in range(kmeans.cluster_centers_.shape[1])]
+            )
+            centroid_df.index.name = 'Klaster'
+            # Dikonversi jadi TSV (Tab Separated) supaya Excel otomatis ngebaca per kolom
+            st.sidebar.code(centroid_df.to_csv(sep='\t'), language='text')
 
-        # =====================================================================
-        # KODE TAMBAHAN UNTUK MENAMPILKAN TITIK KOORDINAT SISWA BUAT EXCEL
-        # =====================================================================
-        st.sidebar.markdown("---")
-        st.sidebar.subheader("📋 Koordinat Siswa (Buat Excel)")
-        st.sidebar.dataframe(df[['Nama', 'PC1', 'PC2', 'PC3']])
-        st.sidebar.caption("Copy data PC1, PC2, PC3 ini buat gantiin tabel titik siswa manual lu di Excel.")
+            st.sidebar.markdown("---")
+            st.sidebar.subheader("📋 Koordinat Siswa")
+            st.sidebar.code(df[['Nama', 'PC1', 'PC2', 'PC3']].to_csv(index=False, sep='\t'), language='text')
+            
+            st.sidebar.caption("Matikan toggle 'Mode Bantuan Excel' jika sudah selesai agar menu kembali rapi.")
         # =====================================================================
         
         if n_clusters >= 2:
@@ -621,7 +618,6 @@ elif menu == "Dashboard Analisis (Admin)":
                     color_discrete_sequence=['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
                 )
                 
-                # Implementasi Rounded Corners Penuh dengan base=0.05
                 fig_bar.update_traces(marker_cornerradius=12, marker_line_width=0, base=0.05)
                 fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color='white')
                 st.plotly_chart(fig_bar, use_container_width=True)
@@ -694,7 +690,6 @@ elif menu == "Dashboard Analisis (Admin)":
                 st.subheader("📥 Cetak Laporan Operasional (PDF)")
                 st.info("💡 Klik tombol di bawah ini. Pastikan untuk mencentang opsi **'Background graphics' (Grafik Latar Belakang)** di pengaturan jendela *Print* agar tampilan kaca (Glass UI) tetap terlihat.")
                 
-                # HTML Button Injection untuk trigger Print Browser
                 html_btn_1 = """
                 <style>
                 .print-btn {
@@ -763,7 +758,6 @@ elif menu == "Dashboard Analisis (Admin)":
                     df_kritis = df_filtered[df_filtered['Cluster'] == klaster_terburuk]
                     st.subheader(f"Proporsi Jurusan Kritis (Klaster {klaster_terburuk})")
                     
-                    # Implementasi warna gelap mewah (Deep Jewel Tones)
                     dark_colors = ['#1e3a8a', '#5b21b6', '#0f766e', '#991b1b', '#9a3412']
                     
                     fig_donut = px.pie(df_kritis, names='Jurusan', hole=0.5, color_discrete_sequence=dark_colors)
@@ -809,7 +803,6 @@ elif menu == "Dashboard Analisis (Admin)":
                 st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
                 st.info("💡 Klik tombol di bawah ini untuk mencetak halaman Laporan Eksekutif ini menjadi PDF.")
                 
-                # HTML Button Injection untuk trigger Print Browser
                 html_btn_2 = """
                 <style>
                 .print-btn {
