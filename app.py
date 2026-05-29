@@ -503,6 +503,15 @@ elif menu == "Dashboard Analisis (Admin)":
         st.sidebar.caption("Ganti nilai C1, C2, C3 di Excel Tahap 5 dengan angka pada tabel ini biar hasilnya klop.")
         # =====================================================================
 
+        # =====================================================================
+        # KODE TAMBAHAN UNTUK MENAMPILKAN TITIK KOORDINAT SISWA BUAT EXCEL
+        # =====================================================================
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("📋 Koordinat Siswa (Buat Excel)")
+        st.sidebar.dataframe(df_filtered[['Nama', 'PC1', 'PC2', 'PC3']])
+        st.sidebar.caption("Copy data PC1, PC2, PC3 ini buat gantiin tabel titik siswa manual lu di Excel.")
+        # =====================================================================
+        
         if n_clusters >= 2:
             skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
             st.sidebar.markdown("---")
