@@ -13,6 +13,107 @@ from supabase import create_client, Client
 st.set_page_config(page_title="Sistem Penilaian Kepuasan SMK", layout="wide", initial_sidebar_state="expanded")
 
 # ==========================================
+# KONSTANTA MODULE-LEVEL (DIBUAT SEKALI)
+# ==========================================
+KAMUS = {
+    'P1': {'masalah': 'Fasilitas pendukung dirasa kurang lengkap', 'solusi': 'Inventarisasi lab dan ajukan pengadaan alat.'},
+    'P2': {'masalah': 'Peralatan belajar banyak rusak', 'solusi': 'Maintenance rutin peralatan.'},
+    'P3': {'masalah': 'Area sekolah dirasa kurang aman', 'solusi': 'Tingkatkan keamanan sekolah.'},
+    'P4': {'masalah': 'Lokasi fasilitas sulit dijangkau', 'solusi': 'Perbaiki layout fasilitas publik.'},
+    'P5': {'masalah': 'Fasilitas belum maksimal membantu belajar', 'solusi': 'Evaluasi penggunaan lab.'},
+    'P6': {'masalah': 'Materi kurang relevan dengan industri', 'solusi': 'Undang praktisi dan sinkronisasi kurikulum.'},
+    'P7': {'masalah': 'Siswa kesulitan memahami materi', 'solusi': 'Sederhanakan modul pembelajaran.'},
+    'P8': {'masalah': 'Kurikulum belum sesuai minat', 'solusi': 'Perkuat program konseling.'},
+    'P9': {'masalah': 'Metode pembelajaran membosankan', 'solusi': 'Pelatihan guru untuk metode interaktif.'},
+    'P10': {'masalah': 'Materi dirasa kurang bermanfaat', 'solusi': 'Seminar prospek karir.'},
+    'P11': {'masalah': 'Guru kurang menguasai materi', 'solusi': 'Sertakan guru dalam magang industri.'},
+    'P12': {'masalah': 'Penjelasan guru kurang jelas', 'solusi': 'Kumpulkan feedback metode mengajar.'},
+    'P13': {'masalah': 'Guru kurang memberi teladan', 'solusi': 'Tegakkan kode etik pengajar.'},
+    'P14': {'masalah': 'Guru sulit dihubungi saat kesulitan', 'solusi': 'Sediakan jam konsultasi siswa.'},
+    'P15': {'masalah': 'Guru sering terlambat mengajar', 'solusi': 'Terapkan presensi ketat bagi pengajar.'},
+    'P16': {'masalah': 'Kebersihan lingkungan kurang terjaga', 'solusi': 'Galakkan program kebersihan.'},
+    'P17': {'masalah': 'Lingkungan sekolah rawan gangguan', 'solusi': 'Tindak tegas pelanggaran ketertiban.'},
+    'P18': {'masalah': 'Suasana kelas kurang kondusif', 'solusi': 'Perbaiki fasilitas kelas.'},
+    'P19': {'masalah': 'Hubungan sosial kurang harmonis', 'solusi': 'Adakan kegiatan kebersamaan.'},
+    'P20': {'masalah': 'Budaya sopan santun belum maksimal', 'solusi': 'Kampanyekan budaya 5S.'}
+}
+
+DIMENSI_MAP = {
+    'Fasilitas': [f'P{i}' for i in range(1, 6)], 
+    'Kurikulum': [f'P{i}' for i in range(6, 11)],
+    'Guru': [f'P{i}' for i in range(11, 16)], 
+    'Lingkungan': [f'P{i}' for i in range(16, 21)]
+}
+
+# ==========================================
+# HELPER FUNCTIONS
+# ==========================================
+def get_status_color(skor):
+    """Mengembalikan status dan kelas CSS warna berdasarkan skor rata-rata."""
+    if skor >= 4.0: return "Sangat Memuaskan", "glass-green"
+    elif skor >= 3.0: return "Cukup Memuaskan", "glass-blue"
+    elif skor >= 2.0: return "Perlu Perbaikan", "glass-orange"
+    else: return "Kritis", "glass-red"
+
+def cetak_pdf_button(label, bg_gradient, border_color, shadow_color):
+    """Komponen HTML terpadu untuk tombol cetak bergaya liquid glass."""
+    html = f"""
+    <style>
+    .print-btn {{
+        background: {bg_gradient};
+        border: 1px solid {border_color};
+        border-top: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        color: white;
+        padding: 12px 20px;
+        font-size: 15px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        width: 100%;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255,255,255,0.15);
+        font-weight: 500;
+    }}
+    .print-btn:hover {{
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 25px {shadow_color}, inset 0 2px 4px rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }}
+    </style>
+    <button class="print-btn" onclick="window.parent.print()">{label}</button>
+    """
+    components.html(html, height=60)
+
+# ==========================================
+# CACHED ML PIPELINE
+# ==========================================
+@st.cache_data(show_spinner=False)
+def run_ml_pipeline(df_numeric, mode_pca, n_clusters, gunakan_pca):
+    """Pipeline ML yang dicache untuk menghindari re-kalkulasi saat slider UI berubah."""
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(df_numeric)
+
+    if mode_pca == "Mode Visualisasi 3D (3 Komponen)":
+        pca = PCA(n_components=3)
+    else:
+        pca = PCA(n_components=0.72)
+
+    pca_data = pca.fit_transform(scaled_data)
+    variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
+    jumlah_dimensi_baru = pca.n_components_
+
+    data_untuk_kmeans = pca_data if gunakan_pca else scaled_data
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    cluster_labels = kmeans.fit_predict(data_untuk_kmeans)
+    
+    skor_siluet = 0
+    if n_clusters >= 2:
+        skor_siluet = silhouette_score(data_untuk_kmeans, cluster_labels)
+
+    return pca_data, variansi_terjelaskan, jumlah_dimensi_baru, cluster_labels, kmeans.cluster_centers_, skor_siluet
+
+
+# ==========================================
 # KONEKSI DATABASE SUPABASE
 # ==========================================
 @st.cache_resource
@@ -27,7 +128,7 @@ def init_connection():
 supabase = init_connection()
 
 # ==========================================
-# CUSTOM CSS: LIQUID GLASS & ELEGANT UI
+# CUSTOM CSS: LIQUID GLASS UPGRADE (KUBE.IO STYLE)
 # ==========================================
 glass_css = """
 <style>
@@ -42,6 +143,7 @@ glass_css = """
     background-color: rgba(10, 10, 15, 0.7); 
     background-blend-mode: overlay;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    min-height: -webkit-fill-available !important; 
 }
 
 /* 2. WADAH UTAMA: KACA TEBAL HALUS */
@@ -54,13 +156,13 @@ glass_css = """
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     border-radius: 20px !important; 
-    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important; /* Specular top */
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.02) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.6) !important;
     box-shadow: 
         0 30px 60px rgba(0, 0, 0, 0.5), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.05), 
+        inset 0 2px 4px rgba(255, 255, 255, 0.08), 
         inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease !important;
 }
@@ -70,7 +172,7 @@ glass_css = """
     transform: translateY(-2px);
     box-shadow: 
         0 40px 80px rgba(0, 0, 0, 0.6), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.1), 
+        inset 0 2px 6px rgba(255, 255, 255, 0.15), 
         inset 0 -4px 8px rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -80,7 +182,19 @@ h1, h2, h3, h4, p, label, span, li, div[data-testid="stMarkdownContainer"] {
     letter-spacing: 0.2px;
 }
 
-/* 3. SLIDER & TOGGLE ALA KUBE.IO (LIQUID GLASS) */
+/* 3. INPUT FIELDS & SELECTBOX (BARU) */
+div[data-baseweb="input"] > div,
+div[data-baseweb="select"] > div {
+    background: rgba(18, 18, 24, 0.45) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2) !important;
+    color: white !important;
+}
+
+/* 4. SLIDER & TOGGLE ALA KUBE.IO (LIQUID GLASS) */
 /* Slider Track Cekung */
 div[data-baseweb="slider"] > div > div {
     background: rgba(5, 5, 10, 0.6) !important;
@@ -95,7 +209,7 @@ div[data-baseweb="slider"] > div > div {
 /* Progress Bar Biru Kaca */
 div[data-baseweb="slider"] > div > div > div {
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(96, 165, 250, 0.9)) !important;
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6) !important; /* Brighter highlight */
     border-radius: 12px !important;
 }
 
@@ -106,15 +220,13 @@ div[data-baseweb="slider"] div[role="slider"] {
     background: rgba(255, 255, 255, 0.08) !important; 
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.6) !important; /* Specular highlight bar */
     border-radius: 16px !important;
-    
-    /* Bezel Lip (Cembung) */
     box-shadow: 
         0 8px 16px rgba(0, 0, 0, 0.6), 
-        inset 0 4px 8px rgba(255, 255, 255, 0.7), 
+        inset 0 4px 8px rgba(255, 255, 255, 0.5), 
         inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
-        
     transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease !important;
     cursor: grab !important;
 }
@@ -125,21 +237,24 @@ div[data-baseweb="slider"] div[role="slider"]:active {
     background: rgba(255, 255, 255, 0.15) !important;
     box-shadow: 
         0 2px 6px rgba(0, 0, 0, 0.6), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.5), 
+        inset 0 4px 8px rgba(255, 255, 255, 0.4), 
         inset 0 -2px 4px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Styling Streamlit Toggle Switch agar seirama dengan liquid glass */
+/* Lip Bezel Toggle/Switch */
 [data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div {
     background: rgba(5, 5, 10, 0.6) !important;
-    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.2) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(0, 0, 0, 0.8) !important;
 }
 [data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div > div {
-    background: rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%) !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
+    border-radius: 50% !important;
 }
 
-/* 4. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
+/* 5. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
 .glass-alert {
     padding: 24px;
     border-radius: 16px;
@@ -152,50 +267,51 @@ div[data-baseweb="slider"] div[role="slider"]:active {
     border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
 
-.glass-green { background: rgba(16, 185, 129, 0.12); border-top: 1px solid rgba(16, 185, 129, 0.3); border-left: 1px solid rgba(16, 185, 129, 0.1); }
-.glass-blue { background: rgba(59, 130, 246, 0.12); border-top: 1px solid rgba(59, 130, 246, 0.3); border-left: 1px solid rgba(59, 130, 246, 0.1); }
-.glass-orange { background: rgba(245, 158, 11, 0.12); border-top: 1px solid rgba(245, 158, 11, 0.3); border-left: 1px solid rgba(245, 158, 11, 0.1); }
-.glass-red { background: rgba(239, 68, 68, 0.12); border-top: 1px solid rgba(239, 68, 68, 0.3); border-left: 1px solid rgba(239, 68, 68, 0.1); }
+.glass-green { background: rgba(16, 185, 129, 0.12); border-top: 1px solid rgba(16, 185, 129, 0.4); border-left: 1px solid rgba(16, 185, 129, 0.1); }
+.glass-blue { background: rgba(59, 130, 246, 0.12); border-top: 1px solid rgba(59, 130, 246, 0.4); border-left: 1px solid rgba(59, 130, 246, 0.1); }
+.glass-orange { background: rgba(245, 158, 11, 0.12); border-top: 1px solid rgba(245, 158, 11, 0.4); border-left: 1px solid rgba(245, 158, 11, 0.1); }
+.glass-red { background: rgba(239, 68, 68, 0.12); border-top: 1px solid rgba(239, 68, 68, 0.4); border-left: 1px solid rgba(239, 68, 68, 0.1); }
 
 /* Tombol Form */
 div.stButton > button,
 div.stDownloadButton > button {
     background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(8px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.4) !important; /* Specular highlight */
     border-radius: 12px !important;
     color: white !important;
     font-weight: 500 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.3s ease !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 div.stButton > button:hover,
 div.stDownloadButton > button:hover {
     background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-2px);
 }
 [data-testid="baseButton-formSubmit"] {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%) !important;
-    border: 1px solid rgba(96, 165, 250, 0.4) !important;
+    border: 1px solid rgba(96, 165, 250, 0.3) !important;
+    border-top: 1px solid rgba(147, 197, 253, 0.6) !important;
     border-radius: 12px !important;
 }
 [data-testid="baseButton-formSubmit"]:hover {
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5) !important;
 }
 
 /* ==========================================
    FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
    ========================================== */
-
-/* 2. Sembunyikan Footer Streamlit */
 footer {
     display: none !important;
     visibility: hidden !important;
     height: 0px !important;
 }
 
-/* 3. Pangkas Ruang Kosong (Padding) Bawaan di Atas dan Bawah */
 .block-container {
     padding-top: 2rem !important; 
     padding-bottom: 1rem !important;
@@ -203,33 +319,26 @@ footer {
     padding-right: 1rem !important;
 }
 
-/* 4. Fix Khusus Mobile (iOS/Safari Background Bug) */
-.stApp {
-    min-height: -webkit-fill-available !important; 
-}
-
 /* ==========================================
    5. PRINT MODE (HTML TO PDF OPTIMIZATION)
    ========================================== */
 @media print {
-    /* Paksa browser mencetak semua warna background dan efek */
     html, body, .stApp, div {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     
-    /* Sembunyikan elemen yang tidak perlu ikut di-print (seperti sidebar dan header) */
     [data-testid="stSidebar"], 
     header[data-testid="stHeader"], 
     footer {
         display: none !important;
     }
 
-    /* Hilangkan background image bawaan saat print agar lebih bersih (opsional) */
     .stApp {
         background-image: none !important;
-        background-color: #0b0b10 !important; /* Warna gelap solid */
+        background-color: #0b0b10 !important; 
     }
+    .stApp::before { display: none !important; }
 }
 </style>
 """
@@ -364,6 +473,7 @@ elif menu == "Dashboard Analisis (Admin)":
                 submit_admin = st.form_submit_button(label='Masuk Dashboard')
 
             if submit_admin:
+                # CATATAN: Pindahkan hardcode password ini ke st.secrets("ADMIN_PASSWORD") pas mau deploy ke production!
                 if username == "admin" and password == "admin123":
                     st.session_state['admin_logged_in'] = True
                     st.rerun()
@@ -411,17 +521,18 @@ elif menu == "Dashboard Analisis (Admin)":
         if uploaded_file is not None:
             try:
                 if uploaded_file.name.endswith('.csv'):
-                    df = pd.read_csv(uploaded_file)
+                    df_temp = pd.read_csv(uploaded_file)
                 else:
-                    df = pd.read_excel(uploaded_file)
+                    df_temp = pd.read_excel(uploaded_file)
                     
                 nama_kolom_baru = ['Timestamp', 'Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin'] + [f'P{i}' for i in range(1, 21)]
                 
-                if len(df.columns) >= 25: 
-                    df = df.iloc[:, :25]
+                # BUGFIX: Safeguard & Readable slicing
+                if len(df_temp.columns) >= 25: 
+                    df = df_temp.iloc[:, :25].copy()
                     df.columns = nama_kolom_baru
                 else:
-                    st.error("Format file tidak sesuai.")
+                    st.error(f"Format file tidak sesuai. Butuh minimal 25 kolom, tapi file cuma punya {len(df_temp.columns)}.")
                     df = None
                     
             except Exception as e:
@@ -438,8 +549,6 @@ elif menu == "Dashboard Analisis (Admin)":
             st.sidebar.warning(f"Ditemukan {jml_awal - jml_akhir} data tidak lengkap. Diabaikan.")
 
         data_numeric = df[kolom_nilai]
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(data_numeric)
 
         st.sidebar.header("2. Mode Konfigurasi PCA")
         mode_pca = st.sidebar.radio(
@@ -447,45 +556,33 @@ elif menu == "Dashboard Analisis (Admin)":
             ["Mode Visualisasi 3D (3 Komponen)", "Mode Validasi Akademis (Target >70%)"]
         )
 
+        st.sidebar.header("3. Konfigurasi Klastering")
+        gunakan_pca = st.sidebar.toggle("Aktifkan Reduksi PCA", value=True)
+        n_clusters = st.sidebar.slider("Jumlah Klaster (K)", 2, 5, 3)
+
+        # ⚡ EXECUTE CACHED ML PIPELINE ⚡
+        with st.spinner("Memproses Model AI..."):
+            pca_data, var_explained, dim_baru, labels, centroids, skor_siluet = run_ml_pipeline(
+                data_numeric, mode_pca, n_clusters, gunakan_pca
+            )
+        
+        # Inject ML results back to DataFrame
+        df['Cluster'] = labels
         if mode_pca == "Mode Visualisasi 3D (3 Komponen)":
-            pca = PCA(n_components=3)
-            pca_data = pca.fit_transform(scaled_data)
-            variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
-            
             df['PC1'] = pca_data[:, 0]
             df['PC2'] = pca_data[:, 1]
             df['PC3'] = pca_data[:, 2]
-            
-            st.sidebar.info(f"Mode Visual Aktif.\nTotal Variansi: {variansi_terjelaskan:.2f}%")
+            st.sidebar.info(f"Mode Visual Aktif.\nTotal Variansi: {var_explained:.2f}%")
             tampilkan_3d = True 
-            
         else:
-            pca = PCA(n_components=0.72) 
-            pca_data = pca.fit_transform(scaled_data)
-            variansi_terjelaskan = sum(pca.explained_variance_ratio_) * 100
-            jumlah_dimensi_baru = pca.n_components_
-            
             df['PC1'] = pca_data[:, 0]
-            
-            if jumlah_dimensi_baru > 1:
-                df['PC2'] = pca_data[:, 1]
-            else:
-                df['PC2'] = 0 
-            
-            st.sidebar.success(f"Mode Akademis Aktif.\nDimensi: {jumlah_dimensi_baru}\nVariansi: {variansi_terjelaskan:.2f}%")
+            df['PC2'] = pca_data[:, 1] if dim_baru > 1 else 0 
+            st.sidebar.success(f"Mode Akademis Aktif.\nDimensi: {dim_baru}\nVariansi: {var_explained:.2f}%")
             st.sidebar.caption("Grafik 3D dinonaktifkan.")
             tampilkan_3d = False 
 
-        st.sidebar.header("3. Konfigurasi Klastering")
-        gunakan_pca = st.sidebar.toggle("Aktifkan Reduksi PCA", value=True)
-        data_untuk_kmeans = pca_data if gunakan_pca else scaled_data 
-
-        n_clusters = st.sidebar.slider("Jumlah Klaster (K)", 2, 5, 3)
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-        df['Cluster'] = kmeans.fit_predict(data_untuk_kmeans)
-
         # =====================================================================
-        # MENU BANTUAN HITUNGAN MANUAL EXCEL DENGAN FITUR TOGGLE & AUTO-COPY
+        # MENU BANTUAN HITUNGAN MANUAL EXCEL
         # =====================================================================
         st.sidebar.markdown("---")
         tampilkan_excel = st.sidebar.toggle("🛠️ Mode Bantuan Excel")
@@ -494,26 +591,19 @@ elif menu == "Dashboard Analisis (Admin)":
             st.sidebar.success("💡 **Info Copy:** Klik tombol copy di sudut kanan atas tiap kotak kode di bawah, lalu langsung paste (CTRL+V) ke cell Excel. Data akan otomatis masuk ke dalam kolom!")
             
             st.sidebar.subheader("📍 Centroid Akhir")
-            centroid_df = pd.DataFrame(
-                kmeans.cluster_centers_, 
-                columns=[f'PC{i+1}' for i in range(kmeans.cluster_centers_.shape[1])]
-            )
+            centroid_df = pd.DataFrame(centroids, columns=[f'PC{i+1}' for i in range(centroids.shape[1])])
             centroid_df.index.name = 'Klaster'
-            
-            # Tambahin parameter decimal=',' biar titik otomatis jadi koma dari sistem
             st.sidebar.code(centroid_df.to_csv(sep='\t', decimal=','), language='text')
 
             st.sidebar.markdown("---")
             st.sidebar.subheader("📋 Koordinat Siswa")
-            
-            # Tambahin parameter decimal=',' juga di sini
-            st.sidebar.code(df[['Nama', 'PC1', 'PC2', 'PC3']].to_csv(index=False, sep='\t', decimal=','), language='text')
+            cols_to_copy = ['Nama', 'PC1', 'PC2', 'PC3'] if tampilkan_3d else ['Nama', 'PC1', 'PC2']
+            st.sidebar.code(df[cols_to_copy].to_csv(index=False, sep='\t', decimal=','), language='text')
             
             st.sidebar.caption("Matikan toggle 'Mode Bantuan Excel' jika sudah selesai agar menu kembali rapi.")
         # =====================================================================
         
         if n_clusters >= 2:
-            skor_siluet = silhouette_score(data_untuk_kmeans, df['Cluster'])
             st.sidebar.markdown("---")
             st.sidebar.subheader("Validasi K-Means")
             st.sidebar.metric(label=f"Silhouette Score (K={n_clusters})", value=f"{skor_siluet:.3f}")
@@ -542,44 +632,13 @@ elif menu == "Dashboard Analisis (Admin)":
         if df_filtered.empty:
             st.warning("Data tidak ditemukan dengan kombinasi filter tersebut.")
         else:
-            df_filtered['Fasilitas'] = df_filtered[[f'P{i}' for i in range(1, 6)]].mean(axis=1)
-            df_filtered['Kurikulum'] = df_filtered[[f'P{i}' for i in range(6, 11)]].mean(axis=1)
-            df_filtered['Guru'] = df_filtered[[f'P{i}' for i in range(11, 16)]].mean(axis=1)
-            df_filtered['Lingkungan'] = df_filtered[[f'P{i}' for i in range(16, 21)]].mean(axis=1)
+            df_filtered['Fasilitas'] = df_filtered[DIMENSI_MAP['Fasilitas']].mean(axis=1)
+            df_filtered['Kurikulum'] = df_filtered[DIMENSI_MAP['Kurikulum']].mean(axis=1)
+            df_filtered['Guru'] = df_filtered[DIMENSI_MAP['Guru']].mean(axis=1)
+            df_filtered['Lingkungan'] = df_filtered[DIMENSI_MAP['Lingkungan']].mean(axis=1)
 
             profile = df_filtered.groupby('Cluster')[['Fasilitas', 'Kurikulum', 'Guru', 'Lingkungan']].mean()
             counts = df_filtered['Cluster'].value_counts().sort_index()
-
-            kamus_masalah = {
-                'P1': 'Fasilitas pendukung dirasa kurang lengkap', 'P2': 'Peralatan belajar banyak rusak',
-                'P3': 'Area sekolah dirasa kurang aman', 'P4': 'Lokasi fasilitas sulit dijangkau',
-                'P5': 'Fasilitas belum maksimal membantu belajar', 'P6': 'Materi kurang relevan dengan industri',
-                'P7': 'Siswa kesulitan memahami materi', 'P8': 'Kurikulum belum sesuai minat',
-                'P9': 'Metode pembelajaran membosankan', 'P10': 'Materi dirasa kurang bermanfaat',
-                'P11': 'Guru kurang menguasai materi', 'P12': 'Penjelasan guru kurang jelas',
-                'P13': 'Guru kurang memberi teladan', 'P14': 'Guru sulit dihubungi saat kesulitan',
-                'P15': 'Guru sering terlambat mengajar', 'P16': 'Kebersihan lingkungan kurang terjaga',
-                'P17': 'Lingkungan sekolah rawan gangguan', 'P18': 'Suasana kelas kurang kondusif',
-                'P19': 'Hubungan sosial kurang harmonis', 'P20': 'Budaya sopan santun belum maksimal'
-            }
-
-            kamus_solusi = {
-                'P1': 'Inventarisasi lab dan ajukan pengadaan alat.', 'P2': 'Maintenance rutin peralatan.',
-                'P3': 'Tingkatkan keamanan sekolah.', 'P4': 'Perbaiki layout fasilitas publik.',
-                'P5': 'Evaluasi penggunaan lab.', 'P6': 'Undang praktisi dan sinkronisasi kurikulum.',
-                'P7': 'Sederhanakan modul pembelajaran.', 'P8': 'Perkuat program konseling.',
-                'P9': 'Pelatihan guru untuk metode interaktif.', 'P10': 'Seminar prospek karir.',
-                'P11': 'Sertakan guru dalam magang industri.', 'P12': 'Kumpulkan feedback metode mengajar.',
-                'P13': 'Tegakkan kode etik pengajar.', 'P14': 'Sediakan jam konsultasi siswa.',
-                'P15': 'Terapkan presensi ketat bagi pengajar.', 'P16': 'Galakkan program kebersihan.',
-                'P17': 'Tindak tegas pelanggaran ketertiban.', 'P18': 'Perbaiki fasilitas kelas.',
-                'P19': 'Adakan kegiatan kebersamaan.', 'P20': 'Kampanyekan budaya 5S.'
-            }
-
-            dimensi_map = {
-                'Fasilitas': [f'P{i}' for i in range(1, 6)], 'Kurikulum': [f'P{i}' for i in range(6, 11)],
-                'Guru': [f'P{i}' for i in range(11, 16)], 'Lingkungan': [f'P{i}' for i in range(16, 21)]
-            }
             
             tab1, tab2 = st.tabs(["Dashboard Analisis", "Laporan Eksekutif"])
 
@@ -598,7 +657,7 @@ elif menu == "Dashboard Analisis (Admin)":
                     fig_3d.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=600, font_color='white')
                     st.plotly_chart(fig_3d, use_container_width=True)
                 else:
-                    st.info(f"Algoritma beroperasi di ruang {pca.n_components_} dimensi. Ditampilkan sebagai Proyeksi 2D Utama.")
+                    st.info(f"Algoritma beroperasi di ruang {dim_baru} dimensi. Ditampilkan sebagai Proyeksi 2D Utama.")
                     
                     st.markdown("**Proyeksi 2D (Komponen Utama 1 vs Komponen Utama 2)**")
                     fig_2d = px.scatter(
@@ -637,29 +696,26 @@ elif menu == "Dashboard Analisis (Admin)":
                     )
                     
                     skor_dimensi = profile.loc[cluster][dim_pilihan]
-                    cols_dimensi = dimensi_map[dim_pilihan]
+                    cols_dimensi = DIMENSI_MAP[dim_pilihan]
                     df_cluster = df_filtered[df_filtered['Cluster'] == cluster]
                     
                     rata_item = df_cluster[cols_dimensi].mean()
                     item_code = rata_item.idxmin()
                     skor_item = rata_item.min()
                     
-                    isi_masalah = kamus_masalah[item_code] 
-                    solusi_masalah = kamus_solusi[item_code] 
+                    isi_masalah = KAMUS[item_code]['masalah'] 
+                    solusi_masalah = KAMUS[item_code]['solusi'] 
 
-                    kelas_terbanyak = int(df_cluster['Kelas'].mode()[0]) if not df_cluster.empty else "N/A"
+                    # BUGFIX: mode crash prevention on empty clusters
+                    mode_kelas = df_cluster['Kelas'].mode()
+                    kelas_terbanyak = int(mode_kelas[0]) if not mode_kelas.empty else "N/A"
                     jml_kelas = len(df_cluster[df_cluster['Kelas'] == kelas_terbanyak])
-                    jurusan_terbanyak = df_cluster['Jurusan'].mode()[0] if not df_cluster.empty else "N/A"
+                    
+                    mode_jur = df_cluster['Jurusan'].mode()
+                    jurusan_terbanyak = mode_jur[0] if not mode_jur.empty else "N/A"
                     jml_jurusan = len(df_cluster[df_cluster['Jurusan'] == jurusan_terbanyak])
 
-                    if skor_item >= 4.0:
-                        status, glass_color = "Sangat Memuaskan", "glass-green"
-                    elif skor_item >= 3.0:
-                        status, glass_color = "Cukup Memuaskan", "glass-blue"
-                    elif skor_item >= 2.0:
-                        status, glass_color = "Perlu Perbaikan", "glass-orange"
-                    else:
-                        status, glass_color = "Kritis", "glass-red"
+                    status, glass_color = get_status_color(skor_item)
 
                     if skor_item >= 4.0:
                         pesan_html = f"""
@@ -693,31 +749,13 @@ elif menu == "Dashboard Analisis (Admin)":
                 st.subheader("📥 Cetak Laporan Operasional (PDF)")
                 st.info("💡 Klik tombol di bawah ini. Pastikan untuk mencentang opsi **'Background graphics' (Grafik Latar Belakang)** di pengaturan jendela *Print* agar tampilan kaca (Glass UI) tetap terlihat.")
                 
-                html_btn_1 = """
-                <style>
-                .print-btn {
-                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%);
-                    border: 1px solid rgba(96, 165, 250, 0.4);
-                    border-radius: 12px;
-                    color: white;
-                    padding: 12px 20px;
-                    font-size: 15px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    width: 100%;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    font-weight: 500;
-                }
-                .print-btn:hover {
-                    border-color: rgba(255, 255, 255, 0.6);
-                    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-                    transform: translateY(-2px);
-                }
-                </style>
-                <button class="print-btn" onclick="window.parent.print()">🖨️ Cetak Dashboard / Save as PDF</button>
-                """
-                components.html(html_btn_1, height=60)
+                # Menggunakan helper function
+                cetak_pdf_button(
+                    label="🖨️ Cetak Dashboard / Save as PDF",
+                    bg_gradient="linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%)",
+                    border_color="rgba(96, 165, 250, 0.4)",
+                    shadow_color="rgba(59, 130, 246, 0.4)"
+                )
 
                 st.markdown("---")
                 st.subheader("Download Database Mentah")
@@ -780,24 +818,17 @@ elif menu == "Dashboard Analisis (Admin)":
                 rata_global_series = pd.Series(rata_global).sort_values() 
 
                 for dimensi, skor_dimensi in rata_global_series.items():
-                    cols_dimensi = dimensi_map[dimensi]
+                    cols_dimensi = DIMENSI_MAP[dimensi]
                     rata_item_dimensi = df_filtered[cols_dimensi].mean()
                     item_terendah = rata_item_dimensi.idxmin()
                     skor_item_terendah = rata_item_dimensi.min()
 
-                    isi_masalah, solusi_masalah = kamus_masalah[item_terendah], kamus_solusi[item_terendah]
+                    isi_masalah, solusi_masalah = KAMUS[item_terendah]['masalah'], KAMUS[item_terendah]['solusi']
+                    status, glass_color = get_status_color(skor_dimensi)
 
                     if skor_dimensi >= 4.0:
-                        status, glass_color = "Sangat Memuaskan", "glass-green"
                         pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br><b>Saran Preventif:</b> Perhatikan poin <i>'{isi_masalah}'</i> (Skor: {skor_item_terendah:.2f}). <b>Tindakan:</b> {solusi_masalah}"
                     else:
-                        if skor_dimensi >= 3.0: 
-                            status, glass_color = "Cukup Memuaskan", "glass-blue"
-                        elif skor_dimensi >= 2.0: 
-                            status, glass_color = "Perlu Perbaikan", "glass-orange"
-                        else: 
-                            status, glass_color = "Kritis", "glass-red"
-                            
                         pesan_html = f"<b>Dimensi {dimensi} (Skor: {skor_dimensi:.2f}/5.00) - {status}</b><br><br><b>Titik Terlemah:</b> <i>'{isi_masalah}'</i> (Skor: <b>{skor_item_terendah:.2f}</b>).<br><br><b>Tindakan:</b> {solusi_masalah}"
 
                     st.markdown(f'<div class="glass-alert {glass_color}">{pesan_html}</div>', unsafe_allow_html=True)
@@ -806,29 +837,9 @@ elif menu == "Dashboard Analisis (Admin)":
                 st.subheader("📥 Cetak Laporan Eksekutif (PDF)")
                 st.info("💡 Klik tombol di bawah ini untuk mencetak halaman Laporan Eksekutif ini menjadi PDF.")
                 
-                html_btn_2 = """
-                <style>
-                .print-btn {
-                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.2) 100%);
-                    border: 1px solid rgba(52, 211, 153, 0.4);
-                    border-radius: 12px;
-                    color: white;
-                    padding: 12px 20px;
-                    font-size: 15px;
-                    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    width: 100%;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    font-weight: 500;
-                }
-                .print-btn:hover {
-                    border-color: rgba(255, 255, 255, 0.6);
-                    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-                    transform: translateY(-2px);
-                }
-                </style>
-                <button class="print-btn" onclick="window.parent.print()">📄 Simpan Halaman Eksekutif ke PDF</button>
-                """
-                components.html(html_btn_2, height=60)
-                
+                cetak_pdf_button(
+                    label="📄 Simpan Halaman Eksekutif ke PDF",
+                    bg_gradient="linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.2) 100%)",
+                    border_color="rgba(52, 211, 153, 0.4)",
+                    shadow_color="rgba(16, 185, 129, 0.4)"
+                )
