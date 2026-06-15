@@ -209,33 +209,48 @@ div[data-baseweb="slider"] > div > div > div[style*="background"] {
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
 }
 
-/* Slider Knob (Bulat Kaca) */
+/* 4. SLIDER & TOGGLE ALA KUBE.IO (FIXED DRAG + BENTUK KAPSUL) */
+
+/* Track Base (Jalur Slider Gelap) */
+div[data-baseweb="slider"] > div > div {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(0, 0, 0, 0.8) !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Track Aktif (Biru Kaca) - CARA AMAN ANTI-BUG */
+div[data-baseweb="slider"] > div > div > div[style*="background"] {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 1)) !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Slider Knob (Bentuk Kapsul Kaca) */
 div[data-baseweb="slider"] div[role="slider"] {
-    height: 24px !important;
-    width: 24px !important; 
-    background: rgba(255, 255, 255, 0.15) !important; 
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    height: 32px !important;
+    width: 56px !important; /* Dikin lebih lebar biar jadi kapsul */
+    background: rgba(255, 255, 255, 0.08) !important; 
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
     border-top: 2px solid rgba(255, 255, 255, 0.9) !important; /* Specular rim */
-    border-radius: 50% !important;
+    border-radius: 16px !important; /* Sudut melengkung halus */
     box-shadow: 
-        0 4px 10px rgba(0, 0, 0, 0.5), 
-        inset 0 4px 6px rgba(255, 255, 255, 0.4), 
-        inset 0 -4px 6px rgba(0, 0, 0, 0.4) !important; 
-    /* Dihapus: transform: none !important; (Biar Streamlit bisa ngegeser tombolnya) */
+        0 8px 16px rgba(0, 0, 0, 0.6), 
+        inset 0 4px 8px rgba(255, 255, 255, 0.5), 
+        inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
+    /* PENTING: Dilarang pakai properti 'transform' di sini biar Streamlit gak error */
     transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
 }
 
 /* Efek Glow saat Slider ditahan / di-drag */
 div[data-baseweb="slider"] div[role="slider"]:active {
-    background: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
     border-color: #60a5fa !important;
     box-shadow: 
-        0 0 15px rgba(96, 165, 250, 0.8), 
-        inset 0 2px 4px rgba(255, 255, 255, 0.8), 
-        inset 0 -2px 4px rgba(0, 0, 0, 0.2) !important;
-    /* Dihapus: transform: scale (Biar gak lompat pas pertama diklik) */
+        0 2px 6px rgba(0, 0, 0, 0.6), 
+        inset 0 4px 8px rgba(255, 255, 255, 0.4), 
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(96, 165, 250, 0.5) !important;
 }
 
 /* Lip Bezel Toggle/Switch (Tetap Aman) */
@@ -249,7 +264,7 @@ div[data-baseweb="slider"] div[role="slider"]:active {
     background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%) !important;
     box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
     border-radius: 50% !important;
-}/* 5. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
+}}/* 5. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
 .glass-alert {
     padding: 24px;
     border-radius: 16px;
