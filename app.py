@@ -194,54 +194,52 @@ div[data-baseweb="select"] > div {
     color: white !important;
 }
 
-/* 4. SLIDER & TOGGLE ALA KUBE.IO (LIQUID GLASS) */
-/* Slider Track Cekung */
+/* 4. SLIDER & TOGGLE ALA KUBE.IO (FIXED BUG DRAGGING) */
+
+/* Track Base (Jalur Slider Gelap) */
 div[data-baseweb="slider"] > div > div {
-    background: rgba(5, 5, 10, 0.6) !important;
-    border-radius: 12px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
     border: 1px solid rgba(0, 0, 0, 0.8) !important;
-    box-shadow: 
-        inset 0 3px 8px rgba(0, 0, 0, 0.9), 
-        inset 0 -1px 2px rgba(255, 255, 255, 0.1) !important; 
-    height: 14px !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8) !important;
 }
 
-/* Progress Bar Biru Kaca */
-div[data-baseweb="slider"] > div > div > div {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(96, 165, 250, 0.9)) !important;
-    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6) !important; /* Brighter highlight */
-    border-radius: 12px !important;
+/* Track Aktif (Biru Kaca) - CARA AMAN ANTI-BUG */
+/* Hanya target elemen yang punya inline warna dari Streamlit, agar 'hitbox' drag tidak ikut terwarnai */
+div[data-baseweb="slider"] > div > div > div[style*="background"] {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 1)) !important;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
 }
 
-/* Slider Knob (Pill-shaped Convex Glass) */
+/* Slider Knob (Bulat Kaca) - Ukuran distabilkan biar hitbox akurat */
 div[data-baseweb="slider"] div[role="slider"] {
-    height: 32px !important;
-    width: 56px !important; 
-    background: rgba(255, 255, 255, 0.08) !important; 
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.6) !important; /* Specular highlight bar */
-    border-radius: 16px !important;
+    height: 24px !important;
+    width: 24px !important; 
+    background: rgba(255, 255, 255, 0.15) !important; 
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-top: 2px solid rgba(255, 255, 255, 0.9) !important; /* Specular rim */
+    border-radius: 50% !important;
     box-shadow: 
-        0 8px 16px rgba(0, 0, 0, 0.6), 
-        inset 0 4px 8px rgba(255, 255, 255, 0.5), 
-        inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
-    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease !important;
-    cursor: grab !important;
+        0 4px 10px rgba(0, 0, 0, 0.5), 
+        inset 0 4px 6px rgba(255, 255, 255, 0.4), 
+        inset 0 -4px 6px rgba(0, 0, 0, 0.4) !important; 
+    /* Sengaja transform dihilangkan agar drag mulus tidak lompat */
+    transform: none !important; 
+    transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
 }
 
+/* Efek Glow saat Slider ditahan / di-drag */
 div[data-baseweb="slider"] div[role="slider"]:active {
-    transform: scale(0.92) !important; 
-    cursor: grabbing !important;
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: #60a5fa !important;
     box-shadow: 
-        0 2px 6px rgba(0, 0, 0, 0.6), 
-        inset 0 4px 8px rgba(255, 255, 255, 0.4), 
-        inset 0 -2px 4px rgba(0, 0, 0, 0.4) !important;
+        0 0 15px rgba(96, 165, 250, 0.8), 
+        inset 0 2px 4px rgba(255, 255, 255, 0.8), 
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Lip Bezel Toggle/Switch */
+/* Lip Bezel Toggle/Switch (Tetap Aman) */
 [data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div {
     background: rgba(5, 5, 10, 0.6) !important;
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.2) !important;
@@ -253,7 +251,6 @@ div[data-baseweb="slider"] div[role="slider"]:active {
     box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
     border-radius: 50% !important;
 }
-
 /* 5. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
 .glass-alert {
     padding: 24px;
