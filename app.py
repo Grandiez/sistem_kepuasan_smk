@@ -156,7 +156,7 @@ glass_css = """
     backdrop-filter: blur(28px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     border-radius: 20px !important; 
-    border-top: 1px solid rgba(255, 255, 255, 0.15) !important; /* Specular top */
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.02) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.6) !important;
@@ -182,7 +182,7 @@ h1, h2, h3, h4, p, label, span, li, div[data-testid="stMarkdownContainer"] {
     letter-spacing: 0.2px;
 }
 
-/* 3. INPUT FIELDS & SELECTBOX (BARU) */
+/* 3. INPUT FIELDS & SELECTBOX */
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div {
     background: rgba(18, 18, 24, 0.45) !important;
@@ -194,55 +194,34 @@ div[data-baseweb="select"] > div {
     color: white !important;
 }
 
-/* 4. SLIDER & TOGGLE ALA KUBE.IO (FIXED BUG DRAGGING - BISA JALAN SEKARANG) */
-
-/* Track Base (Jalur Slider Gelap) */
-div[data-baseweb="slider"] > div > div {
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(0, 0, 0, 0.8) !important;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Track Aktif (Biru Kaca) - CARA AMAN ANTI-BUG */
-div[data-baseweb="slider"] > div > div > div[style*="background"] {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 1)) !important;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
-}
-
 /* 4. SLIDER & TOGGLE ALA KUBE.IO (FIXED DRAG + BENTUK KAPSUL) */
-
-/* Track Base (Jalur Slider Gelap) */
 div[data-baseweb="slider"] > div > div {
     background: rgba(0, 0, 0, 0.3) !important;
     border: 1px solid rgba(0, 0, 0, 0.8) !important;
     box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8) !important;
 }
 
-/* Track Aktif (Biru Kaca) - CARA AMAN ANTI-BUG */
 div[data-baseweb="slider"] > div > div > div[style*="background"] {
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 1)) !important;
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
 }
 
-/* Slider Knob (Bentuk Kapsul Kaca) */
 div[data-baseweb="slider"] div[role="slider"] {
     height: 32px !important;
-    width: 56px !important; /* Dikin lebih lebar biar jadi kapsul */
+    width: 56px !important;
     background: rgba(255, 255, 255, 0.08) !important; 
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    border-top: 2px solid rgba(255, 255, 255, 0.9) !important; /* Specular rim */
-    border-radius: 16px !important; /* Sudut melengkung halus */
+    border-top: 2px solid rgba(255, 255, 255, 0.9) !important;
+    border-radius: 16px !important;
     box-shadow: 
         0 8px 16px rgba(0, 0, 0, 0.6), 
         inset 0 4px 8px rgba(255, 255, 255, 0.5), 
         inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
-    /* PENTING: Dilarang pakai properti 'transform' di sini biar Streamlit gak error */
     transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
 }
 
-/* Efek Glow saat Slider ditahan / di-drag */
 div[data-baseweb="slider"] div[role="slider"]:active {
     background: rgba(255, 255, 255, 0.15) !important;
     border-color: #60a5fa !important;
@@ -253,7 +232,6 @@ div[data-baseweb="slider"] div[role="slider"]:active {
         0 0 15px rgba(96, 165, 250, 0.5) !important;
 }
 
-/* Lip Bezel Toggle/Switch (Tetap Aman) */
 [data-testid="stCheckbox"] > label > div[data-baseweb="checkbox"] > div {
     background: rgba(5, 5, 10, 0.6) !important;
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9), inset 0 -1px 2px rgba(255, 255, 255, 0.2) !important;
@@ -264,7 +242,9 @@ div[data-baseweb="slider"] div[role="slider"]:active {
     background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%) !important;
     box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.3) !important;
     border-radius: 50% !important;
-}}/* 5. TINTED DARK GLASS (KOTAK PERINGATAN / KLASTER) */
+}
+
+/* 5. TINTED DARK GLASS */
 .glass-alert {
     padding: 24px;
     border-radius: 16px;
@@ -282,13 +262,12 @@ div[data-baseweb="slider"] div[role="slider"]:active {
 .glass-orange { background: rgba(245, 158, 11, 0.12); border-top: 1px solid rgba(245, 158, 11, 0.4); border-left: 1px solid rgba(245, 158, 11, 0.1); }
 .glass-red { background: rgba(239, 68, 68, 0.12); border-top: 1px solid rgba(239, 68, 68, 0.4); border-left: 1px solid rgba(239, 68, 68, 0.1); }
 
-/* Tombol Form */
 div.stButton > button,
 div.stDownloadButton > button {
     background: rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.4) !important; /* Specular highlight */
+    border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
     border-radius: 12px !important;
     color: white !important;
     font-weight: 500 !important;
@@ -313,9 +292,7 @@ div.stDownloadButton > button:hover {
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5) !important;
 }
 
-/* ==========================================
-   FIX FULLSCREEN & HIDE STREAMLIT DEFAULT UI
-   ========================================== */
+/* HIDE STREAMLIT DEFAULT UI */
 footer {
     display: none !important;
     visibility: hidden !important;
@@ -329,9 +306,6 @@ footer {
     padding-right: 1rem !important;
 }
 
-/* ==========================================
-   5. PRINT MODE (HTML TO PDF OPTIMIZATION)
-   ========================================== */
 @media print {
     html, body, .stApp, div {
         -webkit-print-color-adjust: exact !important;
@@ -350,6 +324,7 @@ footer {
     }
     .stApp::before { display: none !important; }
 }
+
 /* 6. KOTAK KUESIONER (HACK PASTI JALAN UNTUK SEMUA VERSI STREAMLIT) */
 [data-testid="stForm"] [data-testid="stVerticalBlock"]:has(h3):not(:has(button)) {
     background: rgba(0, 0, 0, 0.3) !important; 
@@ -357,7 +332,7 @@ footer {
     -webkit-backdrop-filter: blur(16px) !important;
     border-radius: 16px !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-top: 2px solid rgba(255, 255, 255, 0.4) !important; /* Pantulan atas */
+    border-top: 2px solid rgba(255, 255, 255, 0.4) !important;
     padding: 1.5rem 1.5rem 0.5rem 1.5rem !important;
     margin-bottom: 2rem !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.05) !important;
@@ -466,7 +441,6 @@ if menu == "Isi Kuesioner (Siswa)":
                 "Kelas": st.session_state['data_diri']['Kelas'],
                 "Jurusan": st.session_state['data_diri']['Jurusan'],
                 "Jenis_Kelamin": st.session_state['data_diri']['Jenis_Kelamin'],
-                # Di-round() biar di Database tetap jadi angka bulat (1, 2, 3, dst) walau gesernya koma-koma
                 "P1": round(p1), "P2": round(p2), "P3": round(p3), "P4": round(p4), "P5": round(p5),
                 "P6": round(p6), "P7": round(p7), "P8": round(p8), "P9": round(p9), "P10": round(p10),
                 "P11": round(p11), "P12": round(p12), "P13": round(p13), "P14": round(p14), "P15": round(p15),
@@ -486,6 +460,7 @@ if menu == "Isi Kuesioner (Siswa)":
             st.session_state['sudah_login'] = False
             st.session_state['data_diri'] = {}
             st.rerun()
+
 # ==========================================
 # HALAMAN 2: DASHBOARD ADMIN 
 # ==========================================
@@ -507,7 +482,6 @@ elif menu == "Dashboard Analisis (Admin)":
                 submit_admin = st.form_submit_button(label='Masuk Dashboard')
 
             if submit_admin:
-                # CATATAN: Pindahkan hardcode password ini ke st.secrets("ADMIN_PASSWORD") pas mau deploy ke production!
                 if username == "admin" and password == "admin123":
                     st.session_state['admin_logged_in'] = True
                     st.rerun()
@@ -561,7 +535,6 @@ elif menu == "Dashboard Analisis (Admin)":
                     
                 nama_kolom_baru = ['Timestamp', 'Nama', 'Kelas', 'Jurusan', 'Jenis_Kelamin'] + [f'P{i}' for i in range(1, 21)]
                 
-                # BUGFIX: Safeguard & Readable slicing
                 if len(df_temp.columns) >= 25: 
                     df = df_temp.iloc[:, :25].copy()
                     df.columns = nama_kolom_baru
@@ -594,13 +567,11 @@ elif menu == "Dashboard Analisis (Admin)":
         gunakan_pca = st.sidebar.toggle("Aktifkan Reduksi PCA", value=True)
         n_clusters = st.sidebar.slider("Jumlah Klaster (K)", 2, 5, 3)
 
-        # ⚡ EXECUTE CACHED ML PIPELINE ⚡
         with st.spinner("Memproses Model AI..."):
             pca_data, var_explained, dim_baru, labels, centroids, skor_siluet = run_ml_pipeline(
                 data_numeric, mode_pca, n_clusters, gunakan_pca
             )
         
-        # Inject ML results back to DataFrame
         df['Cluster'] = labels
         if mode_pca == "Mode Visualisasi 3D (3 Komponen)":
             df['PC1'] = pca_data[:, 0]
@@ -615,9 +586,6 @@ elif menu == "Dashboard Analisis (Admin)":
             st.sidebar.caption("Grafik 3D dinonaktifkan.")
             tampilkan_3d = False 
 
-        # =====================================================================
-        # MENU BANTUAN HITUNGAN MANUAL EXCEL
-        # =====================================================================
         st.sidebar.markdown("---")
         tampilkan_excel = st.sidebar.toggle("🛠️ Mode Bantuan Excel")
         
@@ -635,7 +603,6 @@ elif menu == "Dashboard Analisis (Admin)":
             st.sidebar.code(df[cols_to_copy].to_csv(index=False, sep='\t', decimal=','), language='text')
             
             st.sidebar.caption("Matikan toggle 'Mode Bantuan Excel' jika sudah selesai agar menu kembali rapi.")
-        # =====================================================================
         
         if n_clusters >= 2:
             st.sidebar.markdown("---")
@@ -740,7 +707,6 @@ elif menu == "Dashboard Analisis (Admin)":
                     isi_masalah = KAMUS[item_code]['masalah'] 
                     solusi_masalah = KAMUS[item_code]['solusi'] 
 
-                    # BUGFIX: mode crash prevention on empty clusters
                     mode_kelas = df_cluster['Kelas'].mode()
                     kelas_terbanyak = int(mode_kelas[0]) if not mode_kelas.empty else "N/A"
                     jml_kelas = len(df_cluster[df_cluster['Kelas'] == kelas_terbanyak])
@@ -783,7 +749,6 @@ elif menu == "Dashboard Analisis (Admin)":
                 st.subheader("📥 Cetak Laporan Operasional (PDF)")
                 st.info("💡 Klik tombol di bawah ini. Pastikan untuk mencentang opsi **'Background graphics' (Grafik Latar Belakang)** di pengaturan jendela *Print* agar tampilan kaca (Glass UI) tetap terlihat.")
                 
-                # Menggunakan helper function
                 cetak_pdf_button(
                     label="🖨️ Cetak Dashboard / Save as PDF",
                     bg_gradient="linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(96, 165, 250, 0.2) 100%)",
