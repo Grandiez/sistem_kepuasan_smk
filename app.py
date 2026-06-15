@@ -352,21 +352,21 @@ footer {
 }
 /* 6. KOTAK SECTION DALAM FORM (INNER GLASS CARDS) */
 [data-testid="stVerticalBlockBorderWrapper"] {
-    background: rgba(255, 255, 255, 0.05) !important; 
+    background: rgba(0, 0, 0, 0.3) !important; /* Bikin gelap dikit biar misah dari background ungu form */
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     border-radius: 16px !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.3) !important; /* Pantulan cahaya atas */
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.05) !important;
-    padding: 1rem 1.5rem !important;
+    border-top: 2px solid rgba(255, 255, 255, 0.4) !important; /* Efek pantulan cahaya di pucuk kotak */
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.05) !important;
+    padding: 1.5rem 1.5rem !important;
     margin-bottom: 1.5rem !important;
     transition: transform 0.3s ease, box-shadow 0.3s ease !important;
 }
 
 [data-testid="stVerticalBlockBorderWrapper"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 2px 6px rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 2px 6px rgba(255, 255, 255, 0.15) !important;
 }
 </style>
 """
