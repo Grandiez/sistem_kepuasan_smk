@@ -194,18 +194,21 @@ div[data-baseweb="select"] > div {
     color: white !important;
 }
 
-/* 4. SLIDER & TOGGLE ALA KUBE.IO (FIXED DRAG + BENTUK KAPSUL) */
+/* 4. SLIDER & TOGGLE ALA KUBE.IO DENGAN ANIMASI MEMANTUL (JELLY EFFECT) */
 div[data-baseweb="slider"] > div > div {
     background: rgba(0, 0, 0, 0.3) !important;
     border: 1px solid rgba(0, 0, 0, 0.8) !important;
     box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8) !important;
 }
 
+/* Bar progress biru: ikutan dapet efek mantul (transition all) */
 div[data-baseweb="slider"] > div > div > div[style*="background"] {
     background: linear-gradient(90deg, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 1)) !important;
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.4) !important;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
+/* Kapsul Slider: dikasih spring physics / efek pegas pas pindah (transform) */
 div[data-baseweb="slider"] div[role="slider"] {
     height: 32px !important;
     width: 56px !important;
@@ -219,7 +222,8 @@ div[data-baseweb="slider"] div[role="slider"] {
         0 8px 16px rgba(0, 0, 0, 0.6), 
         inset 0 4px 8px rgba(255, 255, 255, 0.5), 
         inset 0 -4px 8px rgba(0, 0, 0, 0.5) !important; 
-    transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+    /* INI KUNCI ANIMASI MANTUL-NYA (Cubic Bezier Spring) */
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
 }
 
 div[data-baseweb="slider"] div[role="slider"]:active {
@@ -325,7 +329,7 @@ footer {
     .stApp::before { display: none !important; }
 }
 
-/* 6. KOTAK KUESIONER (HACK PASTI JALAN UNTUK SEMUA VERSI STREAMLIT) */
+/* 6. KOTAK KUESIONER MISAH (HACK PASTI JALAN UNTUK SEMUA VERSI STREAMLIT) */
 [data-testid="stForm"] [data-testid="stVerticalBlock"]:has(h3):not(:has(button)) {
     background: rgba(0, 0, 0, 0.3) !important; 
     backdrop-filter: blur(16px) !important;
@@ -399,38 +403,38 @@ if menu == "Isi Kuesioner (Siswa)":
             # --- KOTAK 1 ---
             with st.container():
                 st.subheader("1. Fasilitas Sekolah")
-                p1 = st.slider("Kelengkapan fasilitas lab/bengkel untuk praktik (P1)", 1.0, 5.0, 3.0, step=0.1)
-                p2 = st.slider("Kondisi dan kelayakan peralatan belajar di kelas (P2)", 1.0, 5.0, 3.0, step=0.1)
-                p3 = st.slider("Kenyamanan dan keamanan area sekolah secara umum (P3)", 1.0, 5.0, 3.0, step=0.1)
-                p4 = st.slider("Akses dan kebersihan fasilitas umum (Toilet, Kantin) (P4)", 1.0, 5.0, 3.0, step=0.1)
-                p5 = st.slider("Dukungan fasilitas terhadap kelancaran belajar (P5)", 1.0, 5.0, 3.0, step=0.1)
+                p1 = st.slider("Kelengkapan fasilitas lab/bengkel untuk praktik (P1)", 1, 5, 3)
+                p2 = st.slider("Kondisi dan kelayakan peralatan belajar di kelas (P2)", 1, 5, 3)
+                p3 = st.slider("Kenyamanan dan keamanan area sekolah secara umum (P3)", 1, 5, 3)
+                p4 = st.slider("Akses dan kebersihan fasilitas umum (Toilet, Kantin) (P4)", 1, 5, 3)
+                p5 = st.slider("Dukungan fasilitas terhadap kelancaran belajar (P5)", 1, 5, 3)
 
             # --- KOTAK 2 ---
             with st.container():
                 st.subheader("2. Kurikulum dan Materi Pembelajaran")
-                p6 = st.slider("Kesesuaian materi dengan kebutuhan industri/dunia kerja (P6)", 1.0, 5.0, 3.0, step=0.1)
-                p7 = st.slider("Tingkat kemudahan dalam memahami materi yang diajarkan (P7)", 1.0, 5.0, 3.0, step=0.1)
-                p8 = st.slider("Kesesuaian kurikulum dengan minat dan bakat siswa (P8)", 1.0, 5.0, 3.0, step=0.1)
-                p9 = st.slider("Variasi metode pembelajaran yang digunakan (P9)", 1.0, 5.0, 3.0, step=0.1)
-                p10 = st.slider("Manfaat materi pelajaran untuk masa depan karir (P10)", 1.0, 5.0, 3.0, step=0.1)
+                p6 = st.slider("Kesesuaian materi dengan kebutuhan industri/dunia kerja (P6)", 1, 5, 3)
+                p7 = st.slider("Tingkat kemudahan dalam memahami materi yang diajarkan (P7)", 1, 5, 3)
+                p8 = st.slider("Kesesuaian kurikulum dengan minat dan bakat siswa (P8)", 1, 5, 3)
+                p9 = st.slider("Variasi metode pembelajaran yang digunakan (P9)", 1, 5, 3)
+                p10 = st.slider("Manfaat materi pelajaran untuk masa depan karir (P10)", 1, 5, 3)
 
             # --- KOTAK 3 ---
             with st.container():
                 st.subheader("3. Kinerja dan Kompetensi Guru")
-                p11 = st.slider("Penguasaan materi oleh guru saat mengajar di kelas (P11)", 1.0, 5.0, 3.0, step=0.1)
-                p12 = st.slider("Kejelasan guru dalam menyampaikan penjelasan (P12)", 1.0, 5.0, 3.0, step=0.1)
-                p13 = st.slider("Sikap keteladanan, kedisiplinan, dan etika guru (P13)", 1.0, 5.0, 3.0, step=0.1)
-                p14 = st.slider("Kemudahan menghubungi guru saat mengalami kesulitan belajar (P14)", 1.0, 5.0, 3.0, step=0.1)
-                p15 = st.slider("Ketepatan waktu guru dalam mengisi jam pelajaran (P15)", 1.0, 5.0, 3.0, step=0.1)
+                p11 = st.slider("Penguasaan materi oleh guru saat mengajar di kelas (P11)", 1, 5, 3)
+                p12 = st.slider("Kejelasan guru dalam menyampaikan penjelasan (P12)", 1, 5, 3)
+                p13 = st.slider("Sikap keteladanan, kedisiplinan, dan etika guru (P13)", 1, 5, 3)
+                p14 = st.slider("Kemudahan menghubungi guru saat mengalami kesulitan belajar (P14)", 1, 5, 3)
+                p15 = st.slider("Ketepatan waktu guru dalam mengisi jam pelajaran (P15)", 1, 5, 3)
 
             # --- KOTAK 4 ---
             with st.container():
                 st.subheader("4. Lingkungan Sekolah")
-                p16 = st.slider("Tingkat kebersihan lingkungan sekolah secara keseluruhan (P16)", 1.0, 5.0, 3.0, step=0.1)
-                p17 = st.slider("Keamanan sekolah dari gangguan luar/ketertiban (P17)", 1.0, 5.0, 3.0, step=0.1)
-                p18 = st.slider("Kondusivitas suasana di dalam kelas saat belajar (P18)", 1.0, 5.0, 3.0, step=0.1)
-                p19 = st.slider("Keharmonisan hubungan antar sesama siswa dan warga sekolah (P19)", 1.0, 5.0, 3.0, step=0.1)
-                p20 = st.slider("Penerapan budaya sopan santun (5S) di lingkungan sekolah (P20)", 1.0, 5.0, 3.0, step=0.1)
+                p16 = st.slider("Tingkat kebersihan lingkungan sekolah secara keseluruhan (P16)", 1, 5, 3)
+                p17 = st.slider("Keamanan sekolah dari gangguan luar/ketertiban (P17)", 1, 5, 3)
+                p18 = st.slider("Kondusivitas suasana di dalam kelas saat belajar (P18)", 1, 5, 3)
+                p19 = st.slider("Keharmonisan hubungan antar sesama siswa dan warga sekolah (P19)", 1, 5, 3)
+                p20 = st.slider("Penerapan budaya sopan santun (5S) di lingkungan sekolah (P20)", 1, 5, 3)
             
             submit_button = st.form_submit_button(label='Kirim Evaluasi')
 
@@ -441,10 +445,10 @@ if menu == "Isi Kuesioner (Siswa)":
                 "Kelas": st.session_state['data_diri']['Kelas'],
                 "Jurusan": st.session_state['data_diri']['Jurusan'],
                 "Jenis_Kelamin": st.session_state['data_diri']['Jenis_Kelamin'],
-                "P1": round(p1), "P2": round(p2), "P3": round(p3), "P4": round(p4), "P5": round(p5),
-                "P6": round(p6), "P7": round(p7), "P8": round(p8), "P9": round(p9), "P10": round(p10),
-                "P11": round(p11), "P12": round(p12), "P13": round(p13), "P14": round(p14), "P15": round(p15),
-                "P16": round(p16), "P17": round(p17), "P18": round(p18), "P19": round(p19), "P20": round(p20)
+                "P1": p1, "P2": p2, "P3": p3, "P4": p4, "P5": p5,
+                "P6": p6, "P7": p7, "P8": p8, "P9": p9, "P10": p10,
+                "P11": p11, "P12": p12, "P13": p13, "P14": p14, "P15": p15,
+                "P16": p16, "P17": p17, "P18": p18, "P19": p19, "P20": p20
             }
             
             if supabase:
