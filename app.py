@@ -419,40 +419,45 @@ if menu == "Isi Kuesioner (Siswa)":
         st.title(f"Halo, {st.session_state['data_diri']['Nama']}")
         st.markdown("Silakan isi kuesioner layanan secara objektif. Skala 1 (Sangat Tidak Puas) hingga 5 (Sangat Puas).")
 
-        with st.form(key='kuesioner_form'):
-            st.subheader("1. Fasilitas Sekolah")
-            p1 = st.slider("Kelengkapan fasilitas lab/bengkel untuk praktik (P1)", 1, 5, 3)
-            p2 = st.slider("Kondisi dan kelayakan peralatan belajar di kelas (P2)", 1, 5, 3)
-            p3 = st.slider("Kenyamanan dan keamanan area sekolah secara umum (P3)", 1, 5, 3)
-            p4 = st.slider("Akses dan kebersihan fasilitas umum (Toilet, Kantin) (P4)", 1, 5, 3)
-            p5 = st.slider("Dukungan fasilitas terhadap kelancaran belajar (P5)", 1, 5, 3)
-            st.divider()
+       with st.form(key='kuesioner_form'):
+            
+            # --- KOTAK 1 ---
+            with st.container(border=True):
+                st.subheader("1. Fasilitas Sekolah")
+                p1 = st.slider("Kelengkapan fasilitas lab/bengkel untuk praktik (P1)", 1, 5, 3)
+                p2 = st.slider("Kondisi dan kelayakan peralatan belajar di kelas (P2)", 1, 5, 3)
+                p3 = st.slider("Kenyamanan dan keamanan area sekolah secara umum (P3)", 1, 5, 3)
+                p4 = st.slider("Akses dan kebersihan fasilitas umum (Toilet, Kantin) (P4)", 1, 5, 3)
+                p5 = st.slider("Dukungan fasilitas terhadap kelancaran belajar (P5)", 1, 5, 3)
 
-            st.subheader("2. Kurikulum dan Materi Pembelajaran")
-            p6 = st.slider("Kesesuaian materi dengan kebutuhan industri/dunia kerja (P6)", 1, 5, 3)
-            p7 = st.slider("Tingkat kemudahan dalam memahami materi yang diajarkan (P7)", 1, 5, 3)
-            p8 = st.slider("Kesesuaian kurikulum dengan minat dan bakat siswa (P8)", 1, 5, 3)
-            p9 = st.slider("Variasi metode pembelajaran yang digunakan (P9)", 1, 5, 3)
-            p10 = st.slider("Manfaat materi pelajaran untuk masa depan karir (P10)", 1, 5, 3)
-            st.divider()
+            # --- KOTAK 2 ---
+            with st.container(border=True):
+                st.subheader("2. Kurikulum dan Materi Pembelajaran")
+                p6 = st.slider("Kesesuaian materi dengan kebutuhan industri/dunia kerja (P6)", 1, 5, 3)
+                p7 = st.slider("Tingkat kemudahan dalam memahami materi yang diajarkan (P7)", 1, 5, 3)
+                p8 = st.slider("Kesesuaian kurikulum dengan minat dan bakat siswa (P8)", 1, 5, 3)
+                p9 = st.slider("Variasi metode pembelajaran yang digunakan (P9)", 1, 5, 3)
+                p10 = st.slider("Manfaat materi pelajaran untuk masa depan karir (P10)", 1, 5, 3)
 
-            st.subheader("3. Kinerja dan Kompetensi Guru")
-            p11 = st.slider("Penguasaan materi oleh guru saat mengajar di kelas (P11)", 1, 5, 3)
-            p12 = st.slider("Kejelasan guru dalam menyampaikan penjelasan (P12)", 1, 5, 3)
-            p13 = st.slider("Sikap keteladanan, kedisiplinan, dan etika guru (P13)", 1, 5, 3)
-            p14 = st.slider("Kemudahan menghubungi guru saat mengalami kesulitan belajar (P14)", 1, 5, 3)
-            p15 = st.slider("Ketepatan waktu guru dalam mengisi jam pelajaran (P15)", 1, 5, 3)
-            st.divider()
+            # --- KOTAK 3 ---
+            with st.container(border=True):
+                st.subheader("3. Kinerja dan Kompetensi Guru")
+                p11 = st.slider("Penguasaan materi oleh guru saat mengajar di kelas (P11)", 1, 5, 3)
+                p12 = st.slider("Kejelasan guru dalam menyampaikan penjelasan (P12)", 1, 5, 3)
+                p13 = st.slider("Sikap keteladanan, kedisiplinan, dan etika guru (P13)", 1, 5, 3)
+                p14 = st.slider("Kemudahan menghubungi guru saat mengalami kesulitan belajar (P14)", 1, 5, 3)
+                p15 = st.slider("Ketepatan waktu guru dalam mengisi jam pelajaran (P15)", 1, 5, 3)
 
-            st.subheader("4. Lingkungan Sekolah")
-            p16 = st.slider("Tingkat kebersihan lingkungan sekolah secara keseluruhan (P16)", 1, 5, 3)
-            p17 = st.slider("Keamanan sekolah dari gangguan luar/ketertiban (P17)", 1, 5, 3)
-            p18 = st.slider("Kondusivitas suasana di dalam kelas saat belajar (P18)", 1, 5, 3)
-            p19 = st.slider("Keharmonisan hubungan antar sesama siswa dan warga sekolah (P19)", 1, 5, 3)
-            p20 = st.slider("Penerapan budaya sopan santun (5S) di lingkungan sekolah (P20)", 1, 5, 3)
+            # --- KOTAK 4 ---
+            with st.container(border=True):
+                st.subheader("4. Lingkungan Sekolah")
+                p16 = st.slider("Tingkat kebersihan lingkungan sekolah secara keseluruhan (P16)", 1, 5, 3)
+                p17 = st.slider("Keamanan sekolah dari gangguan luar/ketertiban (P17)", 1, 5, 3)
+                p18 = st.slider("Kondusivitas suasana di dalam kelas saat belajar (P18)", 1, 5, 3)
+                p19 = st.slider("Keharmonisan hubungan antar sesama siswa dan warga sekolah (P19)", 1, 5, 3)
+                p20 = st.slider("Penerapan budaya sopan santun (5S) di lingkungan sekolah (P20)", 1, 5, 3)
             
             submit_button = st.form_submit_button(label='Kirim Evaluasi')
-
         if submit_button:
             data_responden = {
                 "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
