@@ -419,7 +419,7 @@ if menu == "Isi Kuesioner (Siswa)":
         st.title(f"Halo, {st.session_state['data_diri']['Nama']}")
         st.markdown("Silakan isi kuesioner layanan secara objektif. Skala 1 (Sangat Tidak Puas) hingga 5 (Sangat Puas).")
 
-with st.form(key='kuesioner_form'):
+        with st.form(key='kuesioner_form'):
             
             # --- KOTAK 1 ---
             with st.container():
@@ -486,7 +486,6 @@ with st.form(key='kuesioner_form'):
             st.session_state['sudah_login'] = False
             st.session_state['data_diri'] = {}
             st.rerun()
-
 # ==========================================
 # HALAMAN 2: DASHBOARD ADMIN 
 # ==========================================
